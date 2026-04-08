@@ -1,6 +1,5 @@
 /**
  * CRC32 implementation with configurable polynomial.
- * Port of HasherCrc32Traits from C++ codebase.
  */
 
 const POLYNOMIAL = 0xEDB88320;

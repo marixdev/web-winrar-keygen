@@ -1,13 +1,11 @@
 /**
  * Galois Field GF((2^15)^17) arithmetic.
- * 
+ *
  * Ground field: GF(2^15) with irreducible polynomial x^15 + x + 1
  * Extension field: GF((2^15)^17) with irreducible polynomial y^17 + y^3 + 1
- * 
+ *
  * Elements are represented as arrays of 17 uint16 values,
  * each in range [0, 0x7FFF).
- * 
- * Port of WinRarConfig::GF2p15p17Traits from C++ codebase.
  */
 
 const ORDER_GF2p15 = 0x7fff; // 2^15 - 1 = 32767
@@ -327,7 +325,6 @@ export function gfDiv(a: GFElement, b: GFElement): GFElement {
 
 /**
  * Serialize a GF element to bytes.
- * Matches the C++ Dump method exactly.
  */
 export function gfDump(val: GFElement): Uint8Array {
   const result = new Uint8Array(GF_DUMP_SIZE);

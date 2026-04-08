@@ -1,9 +1,7 @@
 /**
  * Elliptic Curve over GF(2^m) — specifically GF((2^15)^17).
- * 
+ *
  * Curve equation: y^2 + xy = x^3 + Ax^2 + B
- * 
- * Port of EllipticCurveGF2m from C++ codebase.
  */
 
 import type { GFElement } from "./GaloisField";
@@ -204,7 +202,7 @@ export function ecPointDumpCompressed(p: ECPoint): Uint8Array {
     }
   }
 
-  // Reverse x bytes to big-endian (matching C++ std::reverse)
+  // Reverse x bytes to big-endian
   const xBytesBE = new Uint8Array(xDump.length);
   for (let i = 0; i < xDump.length; i++) {
     xBytesBE[i] = xDump[xDump.length - 1 - i];

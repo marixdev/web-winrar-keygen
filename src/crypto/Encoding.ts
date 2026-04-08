@@ -1,6 +1,5 @@
 /**
  * Encoding support for WinRAR keygen.
- * Mirrors the -e flag from the C++ Windows version:
  *   - UTF-8: Prepends "utf8:" prefix for non-ASCII chars, encodes to UTF-8 bytes
  *   - ASCII: Rejects non-ASCII characters
  *   - ANSI:  Encodes using Windows-1252 codepage (most common Western ANSI codepage)

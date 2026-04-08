@@ -1,12 +1,9 @@
 /**
  * Pure TypeScript SHA-1 implementation.
- * Port of HasherSha1Traits from C++ codebase (non-Windows path).
  *
- * NOTE: This implementation uses a ZEROED initial state (all zeros),
- * matching the original C++ code which creates the hash context
- * with an all-zero initial state. Standard SHA-1 uses
- * {0x67452301, 0xEFCDAB89, ...} but WinRAR keygen does NOT use
- * standard initial values.
+ * NOTE: This implementation uses a ZEROED initial state (all zeros)
+ * instead of the standard SHA-1 constants {0x67452301, 0xEFCDAB89, ...}.
+ * WinRAR keygen intentionally uses an all-zero initial state.
  */
 
 function rotateLeft(x: number, n: number): number {

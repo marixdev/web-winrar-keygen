@@ -427,7 +427,7 @@ UID=abcdef1234567890abcd
             ["Private Key", "240 bit, " + t.hiwS11FixedSeed],
             ["Public Key", "P = k·G"],
             ["Hash", "SHA-1 " + t.hiwS11Variant + " (240 bit)"],
-            [t.hiwS11Sig, "SM2: (r, s) ≤ 240 bit"],
+            [t.hiwS11Sig, "ECDSA: (r, s) ≤ 240 bit"],
             ["Checksum", "CRC32 ~"],
           ]}
         />
@@ -457,6 +457,42 @@ UID=abcdef1234567890abcd
             ["ECDSA", t.hiwS12ECDS, t.hiwS12ECDSDesc],
           ]}
         />
+      </Section>
+
+      {/* Section 13: RAR Archive Creation */}
+      <Section icon="📦" number={13} title={t.hiwS13Title}>
+        <p className="hiw-paragraph">{t.hiwS13P1}</p>
+
+        <InfoCard emoji="⚙️" title={t.hiwS13How}>
+          <ol className="hiw-reason-list">
+            <li>{t.hiwS13Step1}</li>
+            <li>{t.hiwS13Step2}</li>
+            <li>{t.hiwS13Step3}</li>
+            <li>{t.hiwS13Step4}</li>
+            <li>{t.hiwS13Step5}</li>
+            <li>{t.hiwS13Step6}</li>
+          </ol>
+        </InfoCard>
+
+        <InfoCard emoji="❓" title={t.hiwS13WhyRar}>
+          <ol className="hiw-reason-list">
+            <li>{t.hiwS13Reason1}</li>
+            <li>{t.hiwS13Reason2}</li>
+            <li>{t.hiwS13Reason3}</li>
+          </ol>
+        </InfoCard>
+
+        <InfoCard emoji="🗂️" title={t.hiwS13Structure}>
+          <CompareTable
+            headers={[t.hiwS13Block, t.hiwS13Size, t.hiwS13Purpose]}
+            rows={[
+              [t.hiwS13Signature, "7 bytes", t.hiwS13SigDesc],
+              [t.hiwS13ArchiveHdr, "13 bytes", t.hiwS13ArchiveHdrDesc],
+              [t.hiwS13FileHdr, "~40+ bytes", t.hiwS13FileHdrDesc],
+              [t.hiwS13FileData, "variable", t.hiwS13FileDataDesc],
+            ]}
+          />
+        </InfoCard>
       </Section>
     </div>
   );

@@ -1,6 +1,5 @@
 /**
- * WinRAR Keygen - core logic.
- * Port of WinRarKeygen<WinRarConfig> from C++ codebase.
+ * WinRAR Keygen — core key generation and signing logic.
  */
 
 import { SHA1 } from "./SHA1";
@@ -40,8 +39,8 @@ function generatePrivateKey(seed: Uint8Array | null): bigint {
     const digest = sha1.evaluate();
     const dv = new DataView(digest.buffer, digest.byteOffset, digest.byteLength);
     for (let i = 0; i < 5; i++) {
-      // C++: BSWAP32(reinterpret_cast<uint32_t*>(Digest)[i]) = BE read = state[i]
-      generator[i + 1] = dv.getUint32(i * 4, false); // BE read
+      // Read digest as big-endian uint32 (SHA-1 native byte order)
+      generator[i + 1] = dv.getUint32(i * 4, false);
     }
   } else {
     generator[1] = 0xeb3eb781;
@@ -55,13 +54,13 @@ function generatePrivateKey(seed: Uint8Array | null): bigint {
     const sha1 = new SHA1();
     generator[0] = i + 1;
 
-    // Pass raw bytes of the uint32 array (LE byte order, matching x86/x64 C++)
+    // Pass raw bytes of the uint32 array (little-endian byte order)
     sha1.update(new Uint8Array(generator.buffer));
     const digest = sha1.evaluate();
 
-    // C++: BSWAP32(reinterpret_cast<uint32_t*>(Digest)[0]) = BE read = state[0]
+    // Read first 32 bits of digest as big-endian
     const digestView = new DataView(digest.buffer, digest.byteOffset, digest.byteLength);
-    const val = digestView.getUint32(0, false); // BE read
+    const val = digestView.getUint32(0, false);
     rawPrivateKey[i] = val & 0xffff;
   }
 
@@ -70,7 +69,7 @@ function generatePrivateKey(seed: Uint8Array | null): bigint {
 
 // ---- Public Key Generation ----
 
-function generatePublicKeySM2CompressedFormat(
+function compressPublicKeyHex(
   message: string,
   encode: (s: string) => Uint8Array = (s) => new TextEncoder().encode(s)
 ): string {
@@ -122,8 +121,8 @@ function generateHashInteger(message: Uint8Array): bigint {
   const digestView = new DataView(digest.buffer, digest.byteOffset, digest.byteLength);
 
   for (let i = 0; i < 5; i++) {
-    // C++: BSWAP32(reinterpret_cast<uint32_t*>(Digest)[i]) = BE read = state[i]
-    rawHash[i] = digestView.getUint32(i * 4, false); // BE read
+    // Read digest as big-endian uint32 (SHA-1 native byte order)
+    rawHash[i] = digestView.getUint32(i * 4, false);
   }
 
   // SHA1("") with all-zeroed initial value
@@ -202,9 +201,9 @@ export function generateRegisterInfo(
   const encode = stringToBytes ?? ((s: string) => new TextEncoder().encode(s));
   const items: [string, string, string, string] = ["", "", "", ""];
 
-  let temp = generatePublicKeySM2CompressedFormat(userName, encode);
+  let temp = compressPublicKeyHex(userName, encode);
   items[3] = sprintf("60%.48s", temp);
-  items[0] = generatePublicKeySM2CompressedFormat(items[3], encode);
+  items[0] = compressPublicKeyHex(items[3], encode);
   const uid = sprintf("%.16s%.4s", temp.substring(48), items[0]);
 
   // Sign license type

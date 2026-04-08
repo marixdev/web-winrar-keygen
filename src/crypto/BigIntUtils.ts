@@ -70,7 +70,7 @@ export function bigintFromUint16LE(data: Uint16Array): bigint {
 }
 
 /**
- * BSWAP32 equivalent: reverse bytes of a 32-bit integer
+ * Reverse bytes of a 32-bit integer (byte-swap).
  */
 export function bswap32(x: number): number {
   return (
@@ -84,7 +84,7 @@ export function bswap32(x: number): number {
 
 /**
  * Convert SHA-1 digest (20 bytes big-endian) to array of 5 uint32
- * with byte-swap (matching the C++ BSWAP32 pattern).
+ * read in little-endian order.
  */
 export function sha1DigestToUint32Swapped(digest: Uint8Array): Uint32Array {
   const view = new DataView(digest.buffer, digest.byteOffset, digest.byteLength);

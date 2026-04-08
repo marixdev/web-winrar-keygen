@@ -1,7 +1,6 @@
 /**
  * WinRAR curve configuration.
- * Port of WinRarConfig from C++ codebase.
- * 
+ *
  * Curve: y^2 + xy = x^3 + Ax^2 + B over GF((2^15)^17)
  * A = 0 (zero element)
  * B = element with Items[0] = 161
