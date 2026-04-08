@@ -94,9 +94,10 @@ body {
 }
 
 .brand-icon {
-  width: 22px;
-  height: 22px;
-  color: var(--accent);
+  width: 26px;
+  height: 26px;
+  border-radius: 4px;
+  object-fit: contain;
 }
 
 .brand-text {
@@ -571,5 +572,116 @@ body {
 }
 [data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
   background: var(--text-dim);
+}
+
+/* ============================================================
+   USAGE GUIDE
+   ============================================================ */
+.guide-section {
+  margin-top: 1.25rem;
+}
+
+.guide-toggle {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: .5rem .85rem;
+  font-size: .8rem;
+  font-weight: 500;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all .15s ease;
+  width: 100%;
+  justify-content: center;
+}
+
+.guide-toggle:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+}
+
+.guide-toggle-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.guide-chevron {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  transition: transform .2s ease;
+}
+
+.guide-chevron-open {
+  transform: rotate(180deg);
+}
+
+.guide-content {
+  margin-top: .75rem;
+  padding: 1rem 1.25rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  animation: guideSlideIn .2s ease;
+}
+
+@keyframes guideSlideIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.guide-title {
+  font-size: .95rem;
+  font-weight: 700;
+  margin: 0 0 .75rem 0;
+  color: var(--text);
+}
+
+.guide-step {
+  margin-bottom: .85rem;
+}
+
+.guide-step:last-child {
+  margin-bottom: 0;
+}
+
+.guide-step h4 {
+  font-size: .82rem;
+  font-weight: 600;
+  margin: 0 0 .25rem 0;
+  color: var(--accent);
+}
+
+.guide-step p {
+  font-size: .78rem;
+  margin: 0;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+
+.guide-list {
+  margin: .35rem 0 0 0;
+  padding-left: 1.25rem;
+  list-style: disc;
+}
+
+.guide-list li {
+  font-size: .78rem;
+  color: var(--text-dim);
+  line-height: 1.6;
+}
+
+.guide-list code {
+  font-family: "SF Mono", "Cascadia Code", "Fira Code", monospace;
+  font-size: .75rem;
+  padding: .1rem .35rem;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  color: var(--accent);
 }
 

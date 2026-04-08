@@ -64,6 +64,24 @@ export interface Translation {
 
   // Language
   labelLanguage: string;
+
+  // Usage guide
+  guideTitle: string;
+  guideStep1Title: string;
+  guideStep1Desc: string;
+  guideStep2Title: string;
+  guideStep2Desc: string;
+  guideStep3Title: string;
+  guideStep3Desc: string;
+  guideStep3OptionKey: string;
+  guideStep3OptionRar: string;
+  guideStep4Title: string;
+  guideStep4Desc: string;
+  guideStep4MethodKey: string;
+  guideStep4MethodRar: string;
+  guideStep4AltPath: string;
+  guideToggleShow: string;
+  guideToggleHide: string;
 }
 
 // ============================================================
@@ -103,6 +121,22 @@ const en: Translation = {
   themeLight: "Light",
   themeDark: "Dark",
   labelLanguage: "Language",
+  guideTitle: "How to Use",
+  guideStep1Title: "1. Fill in the form",
+  guideStep1Desc: "Enter any Username and License Name. You can use any name you like.",
+  guideStep2Title: "2. Complete the captcha",
+  guideStep2Desc: "Verify the Cloudflare Turnstile captcha to enable the Generate button.",
+  guideStep3Title: "3. Choose export format",
+  guideStep3Desc: "Select one of the two formats below:",
+  guideStep3OptionKey: "rarreg.key — the raw license key file",
+  guideStep3OptionRar: "rarkey.rar — a RAR archive containing the key (double-click to auto-import)",
+  guideStep4Title: "4. Activate WinRAR",
+  guideStep4Desc: "Import the key into WinRAR using one of these methods:",
+  guideStep4MethodKey: "Copy rarreg.key to the WinRAR installation folder (usually C:\\Program Files\\WinRAR\\)",
+  guideStep4MethodRar: "Double-click rarkey.rar — WinRAR will automatically import the license",
+  guideStep4AltPath: "Or drag and drop rarreg.key into WinRAR's window",
+  guideToggleShow: "Show usage guide",
+  guideToggleHide: "Hide usage guide",
 };
 
 const vi: Translation = {
@@ -138,6 +172,22 @@ const vi: Translation = {
   themeLight: "Sáng",
   themeDark: "Tối",
   labelLanguage: "Ngôn ngữ",
+  guideTitle: "Hướng dẫn sử dụng",
+  guideStep1Title: "1. Điền thông tin",
+  guideStep1Desc: "Nhập Tên người dùng và Tên giấy phép bất kỳ. Bạn có thể dùng tên tùy ý.",
+  guideStep2Title: "2. Xác minh captcha",
+  guideStep2Desc: "Hoàn thành captcha Cloudflare Turnstile để kích hoạt nút Tạo Key.",
+  guideStep3Title: "3. Chọn định dạng xuất",
+  guideStep3Desc: "Chọn một trong hai định dạng bên dưới:",
+  guideStep3OptionKey: "rarreg.key — file key giấy phép gốc",
+  guideStep3OptionRar: "rarkey.rar — file RAR chứa key (nhấp đúp để tự động nhập)",
+  guideStep4Title: "4. Kích hoạt WinRAR",
+  guideStep4Desc: "Nhập key vào WinRAR bằng một trong các cách sau:",
+  guideStep4MethodKey: "Sao chép rarreg.key vào thư mục cài đặt WinRAR (thường là C:\\Program Files\\WinRAR\\)",
+  guideStep4MethodRar: "Nhấp đúp rarkey.rar — WinRAR sẽ tự động nhập giấy phép",
+  guideStep4AltPath: "Hoặc kéo thả rarreg.key vào cửa sổ WinRAR",
+  guideToggleShow: "Xem hướng dẫn sử dụng",
+  guideToggleHide: "Ẩn hướng dẫn",
 };
 
 const id: Translation = {
@@ -173,6 +223,22 @@ const id: Translation = {
   themeLight: "Terang",
   themeDark: "Gelap",
   labelLanguage: "Bahasa",
+  guideTitle: "Cara Menggunakan",
+  guideStep1Title: "1. Isi formulir",
+  guideStep1Desc: "Masukkan Nama Pengguna dan Nama Lisensi apa saja. Anda bisa menggunakan nama apa saja.",
+  guideStep2Title: "2. Selesaikan captcha",
+  guideStep2Desc: "Verifikasi captcha Cloudflare Turnstile untuk mengaktifkan tombol Buat.",
+  guideStep3Title: "3. Pilih format ekspor",
+  guideStep3Desc: "Pilih salah satu dari dua format di bawah ini:",
+  guideStep3OptionKey: "rarreg.key — file kunci lisensi mentah",
+  guideStep3OptionRar: "rarkey.rar — arsip RAR berisi kunci (klik dua kali untuk impor otomatis)",
+  guideStep4Title: "4. Aktifkan WinRAR",
+  guideStep4Desc: "Impor kunci ke WinRAR menggunakan salah satu metode ini:",
+  guideStep4MethodKey: "Salin rarreg.key ke folder instalasi WinRAR (biasanya C:\\Program Files\\WinRAR\\)",
+  guideStep4MethodRar: "Klik dua kali rarkey.rar — WinRAR akan mengimpor lisensi secara otomatis",
+  guideStep4AltPath: "Atau seret dan lepas rarreg.key ke jendela WinRAR",
+  guideToggleShow: "Tampilkan panduan penggunaan",
+  guideToggleHide: "Sembunyikan panduan",
 };
 
 const zh: Translation = {
@@ -208,6 +274,22 @@ const zh: Translation = {
   themeLight: "浅色",
   themeDark: "深色",
   labelLanguage: "语言",
+  guideTitle: "使用指南",
+  guideStep1Title: "1. 填写表单",
+  guideStep1Desc: "输入任意用户名和许可证名称。您可以使用任何名称。",
+  guideStep2Title: "2. 完成验证码",
+  guideStep2Desc: "完成 Cloudflare Turnstile 验证码以启用生成按钮。",
+  guideStep3Title: "3. 选择导出格式",
+  guideStep3Desc: "选择以下两种格式之一：",
+  guideStep3OptionKey: "rarreg.key — 原始许可证密钥文件",
+  guideStep3OptionRar: "rarkey.rar — 包含密钥的 RAR 压缩包（双击自动导入）",
+  guideStep4Title: "4. 激活 WinRAR",
+  guideStep4Desc: "通过以下方式之一将密钥导入 WinRAR：",
+  guideStep4MethodKey: "将 rarreg.key 复制到 WinRAR 安装目录（通常为 C:\\Program Files\\WinRAR\\）",
+  guideStep4MethodRar: "双击 rarkey.rar — WinRAR 将自动导入许可证",
+  guideStep4AltPath: "或将 rarreg.key 拖放到 WinRAR 窗口中",
+  guideToggleShow: "查看使用指南",
+  guideToggleHide: "隐藏指南",
 };
 
 const ko: Translation = {
@@ -243,6 +325,22 @@ const ko: Translation = {
   themeLight: "밝은",
   themeDark: "어두운",
   labelLanguage: "언어",
+  guideTitle: "사용 방법",
+  guideStep1Title: "1. 양식 작성",
+  guideStep1Desc: "사용자 이름과 라이선스 이름을 입력하세요. 원하는 이름을 사용할 수 있습니다.",
+  guideStep2Title: "2. 캡차 완료",
+  guideStep2Desc: "Cloudflare Turnstile 캡차를 인증하여 생성 버튼을 활성화하세요.",
+  guideStep3Title: "3. 내보내기 형식 선택",
+  guideStep3Desc: "아래 두 가지 형식 중 하나를 선택하세요:",
+  guideStep3OptionKey: "rarreg.key — 원본 라이선스 키 파일",
+  guideStep3OptionRar: "rarkey.rar — 키가 포함된 RAR 아카이브 (더블 클릭으로 자동 가져오기)",
+  guideStep4Title: "4. WinRAR 활성화",
+  guideStep4Desc: "다음 방법 중 하나로 WinRAR에 키를 가져오세요:",
+  guideStep4MethodKey: "rarreg.key를 WinRAR 설치 폴더에 복사 (보통 C:\\Program Files\\WinRAR\\)",
+  guideStep4MethodRar: "rarkey.rar를 더블 클릭 — WinRAR가 자동으로 라이선스를 가져옵니다",
+  guideStep4AltPath: "또는 rarreg.key를 WinRAR 창에 드래그 앤 드롭",
+  guideToggleShow: "사용 가이드 보기",
+  guideToggleHide: "가이드 숨기기",
 };
 
 const ja: Translation = {
@@ -278,6 +376,22 @@ const ja: Translation = {
   themeLight: "ライト",
   themeDark: "ダーク",
   labelLanguage: "言語",
+  guideTitle: "使い方",
+  guideStep1Title: "1. フォームに入力",
+  guideStep1Desc: "任意のユーザー名とライセンス名を入力してください。お好きな名前を使用できます。",
+  guideStep2Title: "2. キャプチャを完了",
+  guideStep2Desc: "Cloudflare Turnstile キャプチャを認証して、生成ボタンを有効にします。",
+  guideStep3Title: "3. エクスポート形式を選択",
+  guideStep3Desc: "以下の2つの形式から選択してください：",
+  guideStep3OptionKey: "rarreg.key — ライセンスキーファイル",
+  guideStep3OptionRar: "rarkey.rar — キーを含むRARアーカイブ（ダブルクリックで自動インポート）",
+  guideStep4Title: "4. WinRARをアクティベート",
+  guideStep4Desc: "次のいずれかの方法でWinRARにキーをインポートします：",
+  guideStep4MethodKey: "rarreg.keyをWinRARのインストールフォルダにコピー（通常 C:\\Program Files\\WinRAR\\）",
+  guideStep4MethodRar: "rarkey.rarをダブルクリック — WinRARが自動的にライセンスをインポートします",
+  guideStep4AltPath: "またはrarreg.keyをWinRARウィンドウにドラッグ＆ドロップ",
+  guideToggleShow: "使い方ガイドを表示",
+  guideToggleHide: "ガイドを非表示",
 };
 
 const fr: Translation = {
@@ -313,6 +427,22 @@ const fr: Translation = {
   themeLight: "Clair",
   themeDark: "Sombre",
   labelLanguage: "Langue",
+  guideTitle: "Mode d'emploi",
+  guideStep1Title: "1. Remplir le formulaire",
+  guideStep1Desc: "Saisissez un nom d'utilisateur et un nom de licence. Vous pouvez utiliser n'importe quel nom.",
+  guideStep2Title: "2. Compléter le captcha",
+  guideStep2Desc: "Vérifiez le captcha Cloudflare Turnstile pour activer le bouton Générer.",
+  guideStep3Title: "3. Choisir le format d'exportation",
+  guideStep3Desc: "Sélectionnez l'un des deux formats ci-dessous :",
+  guideStep3OptionKey: "rarreg.key — le fichier de clé de licence brut",
+  guideStep3OptionRar: "rarkey.rar — une archive RAR contenant la clé (double-cliquer pour importer)",
+  guideStep4Title: "4. Activer WinRAR",
+  guideStep4Desc: "Importez la clé dans WinRAR en utilisant l'une de ces méthodes :",
+  guideStep4MethodKey: "Copiez rarreg.key dans le dossier d'installation de WinRAR (généralement C:\\Program Files\\WinRAR\\)",
+  guideStep4MethodRar: "Double-cliquez sur rarkey.rar — WinRAR importera automatiquement la licence",
+  guideStep4AltPath: "Ou glissez-déposez rarreg.key dans la fenêtre de WinRAR",
+  guideToggleShow: "Afficher le guide",
+  guideToggleHide: "Masquer le guide",
 };
 
 const de: Translation = {
@@ -348,6 +478,22 @@ const de: Translation = {
   themeLight: "Hell",
   themeDark: "Dunkel",
   labelLanguage: "Sprache",
+  guideTitle: "Anleitung",
+  guideStep1Title: "1. Formular ausfüllen",
+  guideStep1Desc: "Geben Sie einen beliebigen Benutzernamen und Lizenznamen ein.",
+  guideStep2Title: "2. Captcha abschließen",
+  guideStep2Desc: "Bestätigen Sie das Cloudflare Turnstile Captcha, um die Schaltfläche Generieren zu aktivieren.",
+  guideStep3Title: "3. Exportformat wählen",
+  guideStep3Desc: "Wählen Sie eines der beiden folgenden Formate:",
+  guideStep3OptionKey: "rarreg.key — die rohe Lizenzschlüsseldatei",
+  guideStep3OptionRar: "rarkey.rar — ein RAR-Archiv mit dem Schlüssel (Doppelklick zum automatischen Import)",
+  guideStep4Title: "4. WinRAR aktivieren",
+  guideStep4Desc: "Importieren Sie den Schlüssel in WinRAR mit einer dieser Methoden:",
+  guideStep4MethodKey: "Kopieren Sie rarreg.key in den WinRAR-Installationsordner (normalerweise C:\\Program Files\\WinRAR\\)",
+  guideStep4MethodRar: "Doppelklicken Sie auf rarkey.rar — WinRAR importiert die Lizenz automatisch",
+  guideStep4AltPath: "Oder ziehen Sie rarreg.key per Drag & Drop in das WinRAR-Fenster",
+  guideToggleShow: "Anleitung anzeigen",
+  guideToggleHide: "Anleitung ausblenden",
 };
 
 const es: Translation = {
@@ -383,6 +529,22 @@ const es: Translation = {
   themeLight: "Claro",
   themeDark: "Oscuro",
   labelLanguage: "Idioma",
+  guideTitle: "Cómo usar",
+  guideStep1Title: "1. Completar el formulario",
+  guideStep1Desc: "Ingrese cualquier nombre de usuario y nombre de licencia. Puede usar el nombre que desee.",
+  guideStep2Title: "2. Completar el captcha",
+  guideStep2Desc: "Verifique el captcha de Cloudflare Turnstile para habilitar el botón Generar.",
+  guideStep3Title: "3. Elegir formato de exportación",
+  guideStep3Desc: "Seleccione uno de los dos formatos a continuación:",
+  guideStep3OptionKey: "rarreg.key — el archivo de clave de licencia",
+  guideStep3OptionRar: "rarkey.rar — un archivo RAR con la clave (doble clic para importar automáticamente)",
+  guideStep4Title: "4. Activar WinRAR",
+  guideStep4Desc: "Importe la clave en WinRAR usando uno de estos métodos:",
+  guideStep4MethodKey: "Copie rarreg.key en la carpeta de instalación de WinRAR (normalmente C:\\Program Files\\WinRAR\\)",
+  guideStep4MethodRar: "Haga doble clic en rarkey.rar — WinRAR importará la licencia automáticamente",
+  guideStep4AltPath: "O arrastre y suelte rarreg.key en la ventana de WinRAR",
+  guideToggleShow: "Mostrar guía de uso",
+  guideToggleHide: "Ocultar guía",
 };
 
 const th: Translation = {
@@ -418,6 +580,22 @@ const th: Translation = {
   themeLight: "สว่าง",
   themeDark: "มืด",
   labelLanguage: "ภาษา",
+  guideTitle: "วิธีใช้งาน",
+  guideStep1Title: "1. กรอกแบบฟอร์ม",
+  guideStep1Desc: "ป้อนชื่อผู้ใช้และชื่อใบอนุญาตใดก็ได้ คุณสามารถใช้ชื่อใดก็ได้ที่ต้องการ",
+  guideStep2Title: "2. ยืนยัน captcha",
+  guideStep2Desc: "ยืนยัน captcha ของ Cloudflare Turnstile เพื่อเปิดใช้งานปุ่มสร้าง",
+  guideStep3Title: "3. เลือกรูปแบบส่งออก",
+  guideStep3Desc: "เลือกรูปแบบใดรูปแบบหนึ่งด้านล่าง:",
+  guideStep3OptionKey: "rarreg.key — ไฟล์คีย์ลิขสิทธิ์",
+  guideStep3OptionRar: "rarkey.rar — ไฟล์ RAR ที่มีคีย์ (ดับเบิลคลิกเพื่อนำเข้าอัตโนมัติ)",
+  guideStep4Title: "4. เปิดใช้งาน WinRAR",
+  guideStep4Desc: "นำเข้าคีย์สู่ WinRAR ด้วยวิธีใดวิธีหนึ่งต่อไปนี้:",
+  guideStep4MethodKey: "คัดลอก rarreg.key ไปยังโฟลเดอร์ติดตั้ง WinRAR (ปกติคือ C:\\Program Files\\WinRAR\\)",
+  guideStep4MethodRar: "ดับเบิลคลิก rarkey.rar — WinRAR จะนำเข้าลิขสิทธิ์โดยอัตโนมัติ",
+  guideStep4AltPath: "หรือลากและวาง rarreg.key ลงในหน้าต่าง WinRAR",
+  guideToggleShow: "แสดงคู่มือการใช้งาน",
+  guideToggleHide: "ซ่อนคู่มือ",
 };
 
 const ms: Translation = {
@@ -453,6 +631,22 @@ const ms: Translation = {
   themeLight: "Cerah",
   themeDark: "Gelap",
   labelLanguage: "Bahasa",
+  guideTitle: "Cara Penggunaan",
+  guideStep1Title: "1. Isi borang",
+  guideStep1Desc: "Masukkan sebarang Nama Pengguna dan Nama Lesen. Anda boleh menggunakan sebarang nama.",
+  guideStep2Title: "2. Lengkapkan captcha",
+  guideStep2Desc: "Sahkan captcha Cloudflare Turnstile untuk mengaktifkan butang Jana.",
+  guideStep3Title: "3. Pilih format eksport",
+  guideStep3Desc: "Pilih salah satu daripada dua format di bawah:",
+  guideStep3OptionKey: "rarreg.key — fail kunci lesen asal",
+  guideStep3OptionRar: "rarkey.rar — arkib RAR mengandungi kunci (klik dua kali untuk import automatik)",
+  guideStep4Title: "4. Aktifkan WinRAR",
+  guideStep4Desc: "Import kunci ke WinRAR menggunakan salah satu kaedah ini:",
+  guideStep4MethodKey: "Salin rarreg.key ke folder pemasangan WinRAR (biasanya C:\\Program Files\\WinRAR\\)",
+  guideStep4MethodRar: "Klik dua kali rarkey.rar — WinRAR akan mengimport lesen secara automatik",
+  guideStep4AltPath: "Atau seret dan lepas rarreg.key ke tetingkap WinRAR",
+  guideToggleShow: "Papar panduan penggunaan",
+  guideToggleHide: "Sembunyikan panduan",
 };
 
 const ru: Translation = {
@@ -488,6 +682,22 @@ const ru: Translation = {
   themeLight: "Светлая",
   themeDark: "Тёмная",
   labelLanguage: "Язык",
+  guideTitle: "Инструкция",
+  guideStep1Title: "1. Заполните форму",
+  guideStep1Desc: "Введите любое имя пользователя и название лицензии. Можно использовать любое имя.",
+  guideStep2Title: "2. Пройдите капчу",
+  guideStep2Desc: "Подтвердите капчу Cloudflare Turnstile, чтобы активировать кнопку генерации.",
+  guideStep3Title: "3. Выберите формат экспорта",
+  guideStep3Desc: "Выберите один из двух форматов ниже:",
+  guideStep3OptionKey: "rarreg.key — файл лицензионного ключа",
+  guideStep3OptionRar: "rarkey.rar — RAR-архив с ключом (двойной клик для автоматического импорта)",
+  guideStep4Title: "4. Активируйте WinRAR",
+  guideStep4Desc: "Импортируйте ключ в WinRAR одним из следующих способов:",
+  guideStep4MethodKey: "Скопируйте rarreg.key в папку установки WinRAR (обычно C:\\Program Files\\WinRAR\\)",
+  guideStep4MethodRar: "Дважды щёлкните rarkey.rar — WinRAR автоматически импортирует лицензию",
+  guideStep4AltPath: "Или перетащите rarreg.key в окно WinRAR",
+  guideToggleShow: "Показать инструкцию",
+  guideToggleHide: "Скрыть инструкцию",
 };
 
 const fil: Translation = {
@@ -523,6 +733,22 @@ const fil: Translation = {
   themeLight: "Maliwanag",
   themeDark: "Madilim",
   labelLanguage: "Wika",
+  guideTitle: "Paano Gamitin",
+  guideStep1Title: "1. Punan ang form",
+  guideStep1Desc: "Maglagay ng kahit anong Pangalan ng User at Pangalan ng Lisensya. Maaari kang gumamit ng kahit anong pangalan.",
+  guideStep2Title: "2. Kumpletuhin ang captcha",
+  guideStep2Desc: "I-verify ang Cloudflare Turnstile captcha para ma-enable ang Generate button.",
+  guideStep3Title: "3. Pumili ng format ng export",
+  guideStep3Desc: "Pumili ng isa sa dalawang format sa ibaba:",
+  guideStep3OptionKey: "rarreg.key — ang raw na license key file",
+  guideStep3OptionRar: "rarkey.rar — RAR archive na naglalaman ng key (i-double click para sa auto-import)",
+  guideStep4Title: "4. I-activate ang WinRAR",
+  guideStep4Desc: "I-import ang key sa WinRAR gamit ang isa sa mga paraan na ito:",
+  guideStep4MethodKey: "Kopyahin ang rarreg.key sa WinRAR installation folder (karaniwan ay C:\\Program Files\\WinRAR\\)",
+  guideStep4MethodRar: "I-double click ang rarkey.rar — awtomatikong ii-import ng WinRAR ang lisensya",
+  guideStep4AltPath: "O i-drag and drop ang rarreg.key sa window ng WinRAR",
+  guideToggleShow: "Ipakita ang gabay",
+  guideToggleHide: "Itago ang gabay",
 };
 
 const pt: Translation = {
@@ -558,6 +784,22 @@ const pt: Translation = {
   themeLight: "Claro",
   themeDark: "Escuro",
   labelLanguage: "Idioma",
+  guideTitle: "Como Usar",
+  guideStep1Title: "1. Preencha o formulário",
+  guideStep1Desc: "Digite qualquer Nome de Usuário e Nome da Licença. Você pode usar qualquer nome.",
+  guideStep2Title: "2. Complete o captcha",
+  guideStep2Desc: "Verifique o captcha Cloudflare Turnstile para habilitar o botão Gerar.",
+  guideStep3Title: "3. Escolha o formato de exportação",
+  guideStep3Desc: "Selecione um dos dois formatos abaixo:",
+  guideStep3OptionKey: "rarreg.key — o arquivo de chave de licença",
+  guideStep3OptionRar: "rarkey.rar — um arquivo RAR contendo a chave (clique duplo para importar automaticamente)",
+  guideStep4Title: "4. Ativar o WinRAR",
+  guideStep4Desc: "Importe a chave no WinRAR usando um dos métodos abaixo:",
+  guideStep4MethodKey: "Copie rarreg.key para a pasta de instalação do WinRAR (geralmente C:\\Program Files\\WinRAR\\)",
+  guideStep4MethodRar: "Clique duplo em rarkey.rar — o WinRAR importará a licença automaticamente",
+  guideStep4AltPath: "Ou arraste e solte rarreg.key na janela do WinRAR",
+  guideToggleShow: "Mostrar guia de uso",
+  guideToggleHide: "Ocultar guia",
 };
 
 // ============================================================
