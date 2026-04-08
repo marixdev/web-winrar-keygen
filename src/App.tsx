@@ -66,16 +66,42 @@ function App() {
     const saved = localStorage.getItem("lang");
     if (saved) return; // User already chose a language
     const controller = new AbortController();
-    fetch("https://ipapi.co/json/", { signal: controller.signal })
-      .then((r) => r.json())
-      .then((data: { country_code?: string; languages?: string }) => {
-        const cc = (data.country_code ?? "").toLowerCase();
-        const mapped = countryToLang(cc, data.languages ?? "");
+
+    // Use multiple providers with fallback chain
+    async function detectCountry(signal: AbortSignal): Promise<string | null> {
+      // 1) Cloudflare cdn-cgi/trace — works everywhere, no CORS issues
+      try {
+        const r = await fetch("https://www.cloudflare.com/cdn-cgi/trace", { signal });
+        const text = await r.text();
+        const match = text.match(/loc=(\w{2})/);
+        if (match) return match[1].toLowerCase();
+      } catch { /* try next */ }
+
+      // 2) ip-api.com (free, no key needed)
+      try {
+        const r = await fetch("http://ip-api.com/json/?fields=countryCode", { signal });
+        const data = await r.json() as { countryCode?: string };
+        if (data.countryCode) return data.countryCode.toLowerCase();
+      } catch { /* try next */ }
+
+      // 3) ipapi.co (original, can hit rate limits)
+      try {
+        const r = await fetch("https://ipapi.co/json/", { signal });
+        const data = await r.json() as { country_code?: string; languages?: string };
+        if (data.country_code) return data.country_code.toLowerCase();
+      } catch { /* give up */ }
+
+      return null;
+    }
+
+    detectCountry(controller.signal).then((cc) => {
+      if (cc) {
+        const mapped = countryToLang(cc, "");
         if (mapped && mapped in translations) {
           setLang(mapped);
         }
-      })
-      .catch(() => {/* ignore — keep browser fallback */});
+      }
+    });
     return () => controller.abort();
   }, []);
 
