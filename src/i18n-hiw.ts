@@ -171,7 +171,7 @@ const en: HiwTranslation = {
   hiwFlowKey: "Generate Key",
   hiwFlowSign: "ECC Sign",
   hiwS1Title: "Overview",
-  hiwS1P1: "WinRAR uses an ECC (Elliptic Curve Cryptography) digital signature algorithm to generate the license file rarreg.key. Specifically, it uses a variant of the Chinese SM2 digital signature algorithm.",
+  hiwS1P1: "WinRAR uses an ECC (Elliptic Curve Cryptography) digital signature algorithm to generate the license file rarreg.key. Specifically, it uses a custom variant of the SM2 elliptic curve digital signature scheme.",
   hiwS1KeyPoint: "Key Difference",
   hiwS1P2: "Instead of using a curve over a prime field (like Bitcoin or TLS), WinRAR uses a curve over a composite field GF((2¹⁵)¹⁷) — a binary Galois field.",
   hiwS1FlowTitle: "Process Flow",
@@ -306,7 +306,7 @@ const en: HiwTranslation = {
   hiwS12XOR: "XOR",
   hiwS12XORDesc: "Addition in binary fields",
   hiwS12SM2: "SM2",
-  hiwS12SM2Desc: "Chinese digital signature standard",
+  hiwS12SM2Desc: "ECC-based digital signature standard",
 };
 
 // ======================
@@ -319,7 +319,7 @@ const vi: HiwTranslation = {
   hiwFlowKey: "Tạo khóa",
   hiwFlowSign: "Ký ECC",
   hiwS1Title: "Tổng quan",
-  hiwS1P1: "WinRAR sử dụng thuật toán chữ ký số dựa trên đường cong Elliptic (ECC) để tạo file license rarreg.key. Cụ thể, nó dùng một biến thể của thuật toán chữ ký số SM2 của Trung Quốc.",
+  hiwS1P1: "WinRAR sử dụng thuật toán chữ ký số dựa trên đường cong Elliptic (ECC) để tạo file license rarreg.key. Cụ thể, nó dùng một biến thể tùy chỉnh của lược đồ chữ ký số SM2 trên đường cong Elliptic.",
   hiwS1KeyPoint: "Điểm đặc biệt",
   hiwS1P2: "Thay vì dùng đường cong trên trường số nguyên tố (như Bitcoin hay TLS), WinRAR chọn đường cong trên trường hợp thành GF((2¹⁵)¹⁷) — một trường Galois nhị phân.",
   hiwS1FlowTitle: "Luồng xử lý",
@@ -454,7 +454,7 @@ const vi: HiwTranslation = {
   hiwS12XOR: "Phép XOR",
   hiwS12XORDesc: "Cộng trong trường nhị phân",
   hiwS12SM2: "SM2",
-  hiwS12SM2Desc: "Tiêu chuẩn chữ ký số Trung Quốc",
+  hiwS12SM2Desc: "Tiêu chuẩn chữ ký số dựa trên ECC",
 };
 
 // ======================
