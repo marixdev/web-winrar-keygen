@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
 import KeygenForm from "./components/KeygenForm";
-import UsageGuide from "./components/UsageGuide";
 import LanguageSelector from "./components/LanguageSelector";
 import ThemeToggle from "./components/ThemeToggle";
 import VisitCounter from "./components/VisitCounter";
@@ -117,7 +116,6 @@ function App() {
           </header>
           <main className="main-content">
             <KeygenForm />
-            <UsageGuide />
           </main>
           <footer className="app-footer">
             <p>{t.footerText}</p>

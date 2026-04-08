@@ -8,6 +8,7 @@ import { Encoding, preprocessStrings, getEncoder } from "../crypto/Encoding";
 import { buildRar4Archive } from "../crypto/RarArchive";
 import { useI18n } from "../i18n";
 import TurnstileWidget from "./TurnstileWidget";
+import UsageGuide from "./UsageGuide";
 
 type ExportFormat = "key" | "rar";
 
@@ -176,6 +177,9 @@ export default function KeygenForm() {
 
       {/* Error */}
       {error && <div className="alert alert--error">{error}</div>}
+
+      {/* Usage Guide */}
+      <UsageGuide />
 
       {/* Result */}
       {result && (

@@ -253,7 +253,8 @@ body {
 .main-content {
   flex: 1;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
   padding: 2rem 1rem 1rem;
 }
 
@@ -578,7 +579,9 @@ body {
    USAGE GUIDE
    ============================================================ */
 .guide-section {
-  margin-top: 1.25rem;
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border);
 }
 
 .guide-toggle {
@@ -586,33 +589,31 @@ body {
   align-items: center;
   gap: .4rem;
   background: none;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: .5rem .85rem;
-  font-size: .8rem;
+  border: none;
+  padding: .25rem 0;
+  font-size: .78rem;
   font-weight: 500;
+  font-family: var(--font-sans);
   color: var(--text-dim);
   cursor: pointer;
-  transition: all .15s ease;
+  transition: color .15s ease;
   width: 100%;
   justify-content: center;
 }
 
 .guide-toggle:hover {
   color: var(--accent);
-  border-color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 6%, transparent);
 }
 
 .guide-toggle-icon {
-  width: 16px;
-  height: 16px;
+  width: 15px;
+  height: 15px;
   flex-shrink: 0;
 }
 
 .guide-chevron {
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
   flex-shrink: 0;
   transition: transform .2s ease;
 }
@@ -622,11 +623,11 @@ body {
 }
 
 .guide-content {
-  margin-top: .75rem;
-  padding: 1rem 1.25rem;
-  background: var(--card);
+  margin-top: .85rem;
+  padding: 1rem 1.15rem;
+  background: var(--bg-input);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
   animation: guideSlideIn .2s ease;
 }
 
@@ -636,14 +637,14 @@ body {
 }
 
 .guide-title {
-  font-size: .95rem;
+  font-size: .85rem;
   font-weight: 700;
-  margin: 0 0 .75rem 0;
+  margin: 0 0 .65rem 0;
   color: var(--text);
 }
 
 .guide-step {
-  margin-bottom: .85rem;
+  margin-bottom: .7rem;
 }
 
 .guide-step:last-child {
@@ -651,36 +652,36 @@ body {
 }
 
 .guide-step h4 {
-  font-size: .82rem;
+  font-size: .76rem;
   font-weight: 600;
-  margin: 0 0 .25rem 0;
+  margin: 0 0 .15rem 0;
   color: var(--accent);
 }
 
 .guide-step p {
-  font-size: .78rem;
+  font-size: .74rem;
   margin: 0;
   color: var(--text-dim);
   line-height: 1.5;
 }
 
 .guide-list {
-  margin: .35rem 0 0 0;
-  padding-left: 1.25rem;
+  margin: .25rem 0 0 0;
+  padding-left: 1.15rem;
   list-style: disc;
 }
 
 .guide-list li {
-  font-size: .78rem;
+  font-size: .74rem;
   color: var(--text-dim);
-  line-height: 1.6;
+  line-height: 1.55;
 }
 
 .guide-list code {
-  font-family: "SF Mono", "Cascadia Code", "Fira Code", monospace;
-  font-size: .75rem;
-  padding: .1rem .35rem;
-  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: .7rem;
+  padding: .08rem .3rem;
+  border-radius: 3px;
   background: color-mix(in srgb, var(--accent) 10%, transparent);
   color: var(--accent);
 }
