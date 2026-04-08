@@ -454,7 +454,7 @@ UID=abcdef1234567890abcd
             ["Public Key", t.hiwS12PubK, t.hiwS12PubKDesc],
             ["Digital Signature", t.hiwS12DS, t.hiwS12DSDesc],
             ["XOR (⊕)", t.hiwS12XOR, t.hiwS12XORDesc],
-            ["SM2", t.hiwS12SM2, t.hiwS12SM2Desc],
+            ["ECDSA", t.hiwS12ECDS, t.hiwS12ECDSDesc],
           ]}
         />
       </Section>
