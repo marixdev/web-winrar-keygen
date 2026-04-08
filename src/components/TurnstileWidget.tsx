@@ -10,8 +10,8 @@
 import { Turnstile } from "@marsidev/react-turnstile";
 import { useTheme } from "../theme";
 
-/** Cloudflare test sitekey — always passes. Replace for production. */
-const CF_SITE_KEY = "1x00000000000000000000AA";
+/** Cloudflare Turnstile site key */
+const CF_SITE_KEY = "0x4AAAAAAC2Us_5QFpBmw760";
 
 export interface TurnstileWidgetProps {
   onSuccess?: (token: string) => void;
