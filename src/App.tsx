@@ -145,6 +145,7 @@ function App() {
           </main>
           <footer className="app-footer">
             <p>{t.footerText}</p>
+            <p className="copyright">Made with ❤️ by <a href="https://github.com/marixdev" target="_blank" rel="noopener noreferrer">marixdev</a></p>
             <VisitCounter />
           </footer>
         </div>

@@ -512,6 +512,20 @@ body {
   color: var(--text-dim);
 }
 
+.copyright {
+  margin-top: .25rem;
+}
+
+.copyright a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.copyright a:hover {
+  text-decoration: underline;
+}
+
 /* ============================================================
    VISIT COUNTER
    ============================================================ */
