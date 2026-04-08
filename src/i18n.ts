@@ -82,6 +82,13 @@ export interface Translation {
   guideStep4AltPath: string;
   guideToggleShow: string;
   guideToggleHide: string;
+
+  // Navigation
+  navKeygen: string;
+  navHowItWorks: string;
+
+  // Disclaimer
+  disclaimerText: string;
 }
 
 // ============================================================
@@ -137,6 +144,9 @@ const en: Translation = {
   guideStep4AltPath: "Or drag and drop rarreg.key into WinRAR's window",
   guideToggleShow: "Show usage guide",
   guideToggleHide: "Hide usage guide",
+  navKeygen: "Keygen",
+  navHowItWorks: "How It Works",
+  disclaimerText: "This website is for educational purposes only. Please support the author by purchasing a legitimate WinRAR license.",
 };
 
 const vi: Translation = {
@@ -188,6 +198,9 @@ const vi: Translation = {
   guideStep4AltPath: "Hoặc kéo thả rarreg.key vào cửa sổ WinRAR",
   guideToggleShow: "Xem hướng dẫn sử dụng",
   guideToggleHide: "Ẩn hướng dẫn",
+  navKeygen: "Tạo Key",
+  navHowItWorks: "Cách hoạt động",
+  disclaimerText: "Website này phục vụ mục đích học tập. Vui lòng mua bản quyền WinRAR để ủng hộ tác giả.",
 };
 
 const id: Translation = {
@@ -239,6 +252,9 @@ const id: Translation = {
   guideStep4AltPath: "Atau seret dan lepas rarreg.key ke jendela WinRAR",
   guideToggleShow: "Tampilkan panduan penggunaan",
   guideToggleHide: "Sembunyikan panduan",
+  navKeygen: "Keygen",
+  navHowItWorks: "Cara Kerja",
+  disclaimerText: "Website ini hanya untuk tujuan edukasi. Silakan dukung pencipta dengan membeli lisensi WinRAR asli.",
 };
 
 const zh: Translation = {
@@ -290,6 +306,9 @@ const zh: Translation = {
   guideStep4AltPath: "或将 rarreg.key 拖放到 WinRAR 窗口中",
   guideToggleShow: "查看使用指南",
   guideToggleHide: "隐藏指南",
+  navKeygen: "注册机",
+  navHowItWorks: "工作原理",
+  disclaimerText: "本网站仅供学习研究使用。请购买正版 WinRAR 以支持作者。",
 };
 
 const ko: Translation = {
@@ -341,6 +360,9 @@ const ko: Translation = {
   guideStep4AltPath: "또는 rarreg.key를 WinRAR 창에 드래그 앤 드롭",
   guideToggleShow: "사용 가이드 보기",
   guideToggleHide: "가이드 숨기기",
+  navKeygen: "Keygen",
+  navHowItWorks: "작동 원리",
+  disclaimerText: "이 웹사이트는 교육 목적으로만 제공됩니다. 정품 WinRAR 라이선스를 구매하여 개발자를 지원해 주세요.",
 };
 
 const ja: Translation = {
@@ -392,6 +414,9 @@ const ja: Translation = {
   guideStep4AltPath: "またはrarreg.keyをWinRARウィンドウにドラッグ＆ドロップ",
   guideToggleShow: "使い方ガイドを表示",
   guideToggleHide: "ガイドを非表示",
+  navKeygen: "Keygen",
+  navHowItWorks: "仕組み",
+  disclaimerText: "このウェブサイトは教育目的のみです。正規のWinRARライセンスを購入して作者をサポートしてください。",
 };
 
 const fr: Translation = {
@@ -443,6 +468,9 @@ const fr: Translation = {
   guideStep4AltPath: "Ou glissez-déposez rarreg.key dans la fenêtre de WinRAR",
   guideToggleShow: "Afficher le guide",
   guideToggleHide: "Masquer le guide",
+  navKeygen: "Keygen",
+  navHowItWorks: "Fonctionnement",
+  disclaimerText: "Ce site est uniquement à des fins éducatives. Veuillez acheter une licence WinRAR pour soutenir l'auteur.",
 };
 
 const de: Translation = {
@@ -494,6 +522,9 @@ const de: Translation = {
   guideStep4AltPath: "Oder ziehen Sie rarreg.key per Drag & Drop in das WinRAR-Fenster",
   guideToggleShow: "Anleitung anzeigen",
   guideToggleHide: "Anleitung ausblenden",
+  navKeygen: "Keygen",
+  navHowItWorks: "Funktionsweise",
+  disclaimerText: "Diese Website dient nur zu Bildungszwecken. Bitte kaufen Sie eine WinRAR-Lizenz, um den Autor zu unterstützen.",
 };
 
 const es: Translation = {
@@ -545,6 +576,9 @@ const es: Translation = {
   guideStep4AltPath: "O arrastre y suelte rarreg.key en la ventana de WinRAR",
   guideToggleShow: "Mostrar guía de uso",
   guideToggleHide: "Ocultar guía",
+  navKeygen: "Keygen",
+  navHowItWorks: "Cómo Funciona",
+  disclaimerText: "Este sitio web es solo para fines educativos. Por favor, compre una licencia WinRAR para apoyar al autor.",
 };
 
 const th: Translation = {
@@ -596,6 +630,9 @@ const th: Translation = {
   guideStep4AltPath: "หรือลากและวาง rarreg.key ลงในหน้าต่าง WinRAR",
   guideToggleShow: "แสดงคู่มือการใช้งาน",
   guideToggleHide: "ซ่อนคู่มือ",
+  navKeygen: "Keygen",
+  navHowItWorks: "วิธีทำงาน",
+  disclaimerText: "เว็บไซต์นี้มีไว้เพื่อการศึกษาเท่านั้น กรุณาซื้อลิขสิทธิ์ WinRAR เพื่อสนับสนุนผู้พัฒนา",
 };
 
 const ms: Translation = {
@@ -647,6 +684,9 @@ const ms: Translation = {
   guideStep4AltPath: "Atau seret dan lepas rarreg.key ke tetingkap WinRAR",
   guideToggleShow: "Papar panduan penggunaan",
   guideToggleHide: "Sembunyikan panduan",
+  navKeygen: "Keygen",
+  navHowItWorks: "Cara Ia Berfungsi",
+  disclaimerText: "Laman web ini hanya untuk tujuan pendidikan. Sila beli lesen WinRAR untuk menyokong pengarang.",
 };
 
 const ru: Translation = {
@@ -698,6 +738,9 @@ const ru: Translation = {
   guideStep4AltPath: "Или перетащите rarreg.key в окно WinRAR",
   guideToggleShow: "Показать инструкцию",
   guideToggleHide: "Скрыть инструкцию",
+  navKeygen: "Keygen",
+  navHowItWorks: "Как это работает",
+  disclaimerText: "Этот сайт предназначен только для образовательных целей. Пожалуйста, купите лицензию WinRAR для поддержки автора.",
 };
 
 const fil: Translation = {
@@ -749,6 +792,9 @@ const fil: Translation = {
   guideStep4AltPath: "O i-drag and drop ang rarreg.key sa window ng WinRAR",
   guideToggleShow: "Ipakita ang gabay",
   guideToggleHide: "Itago ang gabay",
+  navKeygen: "Keygen",
+  navHowItWorks: "Paano Gumagana",
+  disclaimerText: "Ang website na ito ay para sa layuning pang-edukasyon lamang. Mangyaring bumili ng lisensya ng WinRAR upang suportahan ang may-akda.",
 };
 
 const pt: Translation = {
@@ -800,6 +846,9 @@ const pt: Translation = {
   guideStep4AltPath: "Ou arraste e solte rarreg.key na janela do WinRAR",
   guideToggleShow: "Mostrar guia de uso",
   guideToggleHide: "Ocultar guia",
+  navKeygen: "Keygen",
+  navHowItWorks: "Como Funciona",
+  disclaimerText: "Este site é apenas para fins educacionais. Por favor, compre uma licença WinRAR para apoiar o autor.",
 };
 
 // ============================================================
