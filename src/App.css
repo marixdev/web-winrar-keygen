@@ -576,612 +576,693 @@ body {
 }
 
 /* ============================================================
-   HOW IT WORKS PAGE — 3D / Glassmorphism / Animated
+   HOW IT WORKS — INFOGRAPHIC TIMELINE LAYOUT
    ============================================================ */
-.hiw-container {
-  width: 100%;
-  max-width: 720px;
-  perspective: 1200px;
-  animation: hiwFadeIn .5s ease;
-}
 
-@keyframes hiwFadeIn {
-  from { opacity: 0; transform: translateY(16px); }
+/* ── Container ── */
+.ig-container {
+  width: 100%;
+  max-width: 780px;
+  animation: igFadeIn .5s ease;
+}
+@keyframes igFadeIn {
+  from { opacity: 0; transform: translateY(20px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* ── Scroll-reveal ── */
-.hiw-reveal {
-  opacity: 0;
-  transform: translateY(32px) scale(0.97);
-  transition: opacity .55s cubic-bezier(.22,1,.36,1),
-              transform .55s cubic-bezier(.22,1,.36,1);
-}
-.hiw-reveal.hiw-visible {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-}
-
-/* ── Glassmorphism helper ── */
-.hiw-glass {
-  background: color-mix(in srgb, var(--bg-card) 70%, transparent);
-  backdrop-filter: blur(16px) saturate(1.3);
-  -webkit-backdrop-filter: blur(16px) saturate(1.3);
-  border: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
-}
-
-/* ── Hero ─────────────────────────────────────────── */
-.hiw-hero {
+/* ═══════════════════════════════════════════════════════
+   HERO — full-bleed gradient with animated mesh
+   ═══════════════════════════════════════════════════════ */
+.ig-hero {
   position: relative;
   text-align: center;
-  margin-bottom: 2rem;
-  padding: 2.5rem 1rem 2rem;
-  border-radius: var(--radius);
+  padding: 2.5rem 1.25rem 2rem;
+  margin-bottom: 2.5rem;
+  border-radius: 16px;
   overflow: hidden;
-  background: linear-gradient(145deg,
-    color-mix(in srgb, var(--accent) 8%, var(--bg-card)),
-    color-mix(in srgb, var(--success) 6%, var(--bg-card)));
-  border: 1px solid color-mix(in srgb, var(--accent) 18%, var(--border));
-  box-shadow: 0 0 60px color-mix(in srgb, var(--accent) 10%, transparent),
-              var(--shadow-card);
+  border: 1px solid color-mix(in srgb, var(--accent) 20%, var(--border));
 }
 
-/* Animated background orb */
-.hiw-hero-orb {
-  position: absolute;
-  width: 260px; height: 260px;
-  border-radius: 50%;
-  top: -80px; right: -60px;
-  background: radial-gradient(circle, color-mix(in srgb, var(--accent) 18%, transparent), transparent 70%);
-  animation: hiwOrbFloat 8s ease-in-out infinite alternate;
-  pointer-events: none;
-}
-@keyframes hiwOrbFloat {
-  0%   { transform: translate(0, 0) scale(1); }
-  100% { transform: translate(-30px, 25px) scale(1.15); }
-}
-
-/* Floating particles */
-.hiw-particles {
+.ig-hero-bg {
   position: absolute;
   inset: 0;
-  overflow: hidden;
-  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 20% 50%, color-mix(in srgb, var(--accent) 14%, transparent) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 30%, color-mix(in srgb, var(--success) 10%, transparent) 0%, transparent 55%),
+    linear-gradient(135deg, var(--bg-card), color-mix(in srgb, var(--accent) 4%, var(--bg-card)));
+  animation: igMeshShift 10s ease-in-out infinite alternate;
+  z-index: 0;
 }
-.hiw-particle {
-  position: absolute;
-  bottom: -10%;
-  width: 4px; height: 4px;
-  border-radius: 50%;
-  background: var(--accent);
-  animation: hiwParticleUp linear infinite;
-}
-@keyframes hiwParticleUp {
-  0%   { transform: translateY(0) rotate(0); opacity: 0; }
-  10%  { opacity: 1; }
-  90%  { opacity: 1; }
-  100% { transform: translateY(-400px) rotate(360deg); opacity: 0; }
+@keyframes igMeshShift {
+  0%   { background-position: 0% 0%; }
+  100% { background-position: 100% 100%; }
 }
 
-.hiw-hero-icon {
+.ig-hero-content { position: relative; z-index: 1; }
+
+.ig-hero-icon {
   font-size: 3rem;
-  margin-bottom: .6rem;
-  animation: hiwIconFloat 3s ease-in-out infinite;
-  filter: drop-shadow(0 4px 12px color-mix(in srgb, var(--accent) 30%, transparent));
-  position: relative;
-  z-index: 2;
+  display: inline-block;
+  animation: igHeroPulse 2.5s ease-in-out infinite;
+  filter: drop-shadow(0 6px 16px color-mix(in srgb, var(--accent) 25%, transparent));
 }
-@keyframes hiwIconFloat {
-  0%, 100% { transform: translateY(0) rotateY(0); }
-  50%      { transform: translateY(-8px) rotateY(12deg); }
+@keyframes igHeroPulse {
+  0%, 100% { transform: scale(1) translateY(0); }
+  50%      { transform: scale(1.08) translateY(-6px); }
 }
 
-.hiw-hero-title {
-  font-size: 1.45rem;
-  font-weight: 800;
-  margin-bottom: .5rem;
-  background: linear-gradient(135deg, var(--accent), var(--success), var(--accent));
-  background-size: 200% auto;
+.ig-hero-title {
+  font-size: 1.5rem;
+  font-weight: 900;
+  margin: .5rem 0 .4rem;
+  background: linear-gradient(135deg, var(--accent), var(--success), #a78bfa, var(--accent));
+  background-size: 300% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  animation: hiwGradientShift 4s linear infinite;
-  position: relative;
-  z-index: 2;
+  animation: igGrad 6s linear infinite;
 }
-@keyframes hiwGradientShift {
-  0%   { background-position: 0% center; }
-  100% { background-position: 200% center; }
+@keyframes igGrad {
+  to { background-position: 300% center; }
 }
 
-.hiw-hero-subtitle {
+.ig-hero-sub {
   font-size: .84rem;
   color: var(--text-dim);
-  line-height: 1.55;
-  max-width: 520px;
+  line-height: 1.6;
+  max-width: 540px;
   margin: 0 auto;
-  position: relative;
-  z-index: 2;
 }
 
-/* ── Flow diagram — 3D cards ─────────────────────── */
-.hiw-flow {
+/* ── Pipeline (horizontal flow) ── */
+.ig-pipeline {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: .25rem;
-  margin-bottom: 2rem;
-  padding: 1.1rem;
-  border-radius: var(--radius);
-  box-shadow: 0 8px 32px color-mix(in srgb, var(--accent) 8%, transparent),
-              var(--shadow-card);
+  gap: .15rem;
+  margin-top: 1.5rem;
   flex-wrap: wrap;
+  position: relative;
+  z-index: 1;
 }
 
-.hiw-flow-group {
+.ig-pipe-group {
   display: flex;
   align-items: center;
-  gap: .25rem;
+  gap: .15rem;
 }
 
-.hiw-float {
-  animation: hiwFloatY 3s ease-in-out infinite;
-}
-@keyframes hiwFloatY {
-  0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(-5px); }
-}
-
-.hiw-flow-step {
+.ig-pipe-node {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: .3rem;
-  padding: .55rem .8rem;
-  border-radius: var(--radius-sm);
-  background: color-mix(in srgb, var(--accent) 10%, var(--bg-card));
-  border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
-  min-width: 80px;
+  gap: .25rem;
+  padding: .5rem .7rem;
+  background: color-mix(in srgb, var(--accent) 8%, var(--bg-card));
+  border: 1px solid color-mix(in srgb, var(--accent) 18%, var(--border));
+  border-radius: 12px;
+  min-width: 72px;
   transition: transform .25s ease, box-shadow .25s ease;
-  cursor: default;
+}
+.ig-pipe-node:hover {
+  transform: translateY(-4px) scale(1.06);
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--accent) 18%, transparent);
 }
 
-.hiw-flow-step:hover {
-  transform: translateY(-5px) scale(1.05) !important;
-  box-shadow: 0 8px 20px color-mix(in srgb, var(--accent) 20%, transparent);
-}
+.ig-pipe-icon { font-size: 1.45rem; }
 
-.hiw-flow-icon {
-  font-size: 1.5rem;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,.2));
-}
-
-.hiw-flow-label {
-  font-size: .68rem;
+.ig-pipe-label {
+  font-size: .64rem;
   font-weight: 700;
   color: var(--accent);
-  text-align: center;
   letter-spacing: .02em;
 }
 
-.hiw-flow-arrow {
+.ig-pipe-connector {
   color: var(--accent);
-  opacity: .5;
-  animation: hiwArrowPulse 1.5s ease-in-out infinite;
+  opacity: .45;
 }
-.hiw-arrow-svg { width: 20px; height: 20px; }
-@keyframes hiwArrowPulse {
-  0%, 100% { opacity: .4; transform: translateX(0); }
-  50%      { opacity: .8; transform: translateX(3px); }
+.ig-pipe-svg {
+  width: 32px;
+  height: 12px;
+  animation: igArrowSlide 1.8s ease-in-out infinite;
+}
+@keyframes igArrowSlide {
+  0%, 100% { opacity: .35; transform: translateX(0); }
+  50%      { opacity: .7;  transform: translateX(3px); }
 }
 
-/* ── Sections — 3D card with glow ─────────────────── */
-.hiw-section {
+/* ═══════════════════════════════════════════════════════
+   TIMELINE — vertical spine with alternating cards
+   ═══════════════════════════════════════════════════════ */
+.ig-timeline {
   position: relative;
-  margin-bottom: .7rem;
-  border-radius: var(--radius);
-  overflow: visible;
+  padding: 0 0 2rem;
 }
 
-.hiw-section-inner {
-  position: relative;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-card);
-  transition: transform .35s cubic-bezier(.22,1,.36,1),
-              border-color .3s ease,
-              box-shadow .3s ease;
-  overflow: hidden;
-  z-index: 1;
-  will-change: transform;
-}
-
-.hiw-section--open .hiw-section-inner {
-  border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
-  box-shadow: 0 4px 24px color-mix(in srgb, var(--accent) 10%, transparent),
-              var(--shadow-card);
-}
-
-/* Animated glow ring */
-.hiw-glow {
+/* The vertical line */
+.ig-timeline-line {
   position: absolute;
-  inset: -1px;
-  border-radius: var(--radius);
-  opacity: 0;
-  transition: opacity .4s ease;
-  pointer-events: none;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--accent) 30%, transparent),
+    var(--accent),
+    color-mix(in srgb, var(--success) 40%, var(--accent)),
+    var(--accent),
+    color-mix(in srgb, var(--accent) 30%, transparent)
+  );
+  border-radius: 3px;
+  transform: translateX(-50%);
   z-index: 0;
-  background: conic-gradient(from 0deg, var(--accent), var(--success), var(--accent));
-  filter: blur(6px);
-}
-.hiw-section--open .hiw-glow {
-  opacity: .15;
-  animation: hiwGlowRotate 4s linear infinite;
-}
-@keyframes hiwGlowRotate {
-  to { filter: blur(6px) hue-rotate(360deg); }
 }
 
-.hiw-section-header {
+/* ── Timeline Node ── */
+.ig-node {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  /* Reveal animation */
+  opacity: 0;
+  transition: opacity .6s cubic-bezier(.22,1,.36,1),
+              transform .6s cubic-bezier(.22,1,.36,1);
+}
+.ig-node--left  { transform: translateX(-40px); flex-direction: row-reverse; }
+.ig-node--right { transform: translateX(40px); }
+.ig-node--vis   { opacity: 1; transform: translateX(0) !important; }
+
+/* Card takes up ~47% of the width on each side */
+.ig-node--left .ig-card  { margin-right: calc(50% + 24px); margin-left: 0; }
+.ig-node--right .ig-card { margin-left: calc(50% + 24px); margin-right: 0; }
+
+/* ── Dot on the timeline ── */
+.ig-dot {
+  position: absolute;
+  left: 50%;
+  top: 10px;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
-  gap: .55rem;
-  width: 100%;
-  padding: .9rem 1.15rem;
-  background: none;
-  border: none;
-  font-family: var(--font-sans);
-  color: var(--text);
-  cursor: pointer;
-  transition: background .2s ease;
-}
-
-.hiw-section-header:hover {
-  background: color-mix(in srgb, var(--accent) 5%, var(--bg-hover));
-}
-
-.hiw-section-icon {
-  font-size: 1.2rem;
-  flex-shrink: 0;
-  filter: drop-shadow(0 1px 3px rgba(0,0,0,.15));
+  justify-content: center;
+  z-index: 2;
+  background: linear-gradient(
+    135deg,
+    hsl(var(--hue) 80% 55%),
+    hsl(var(--hue) 70% 42%)
+  );
+  box-shadow: 0 0 0 4px var(--bg),
+              0 0 20px hsl(var(--hue) 80% 55% / .3);
   transition: transform .3s ease;
 }
-.hiw-section--open .hiw-section-icon {
-  transform: scale(1.15);
+.ig-node--vis .ig-dot {
+  animation: igDotPop .4s cubic-bezier(.22,1,.36,1);
+}
+@keyframes igDotPop {
+  0%   { transform: translateX(-50%) scale(0); }
+  60%  { transform: translateX(-50%) scale(1.25); }
+  100% { transform: translateX(-50%) scale(1); }
 }
 
-.hiw-section-num {
-  font-size: .65rem;
-  font-weight: 700;
-  color: var(--text-inv);
-  background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 80%, var(--success)));
-  padding: .12rem .45rem;
-  border-radius: 20px;
-  flex-shrink: 0;
-  box-shadow: 0 2px 6px color-mix(in srgb, var(--accent) 30%, transparent);
+.ig-dot-icon {
+  font-size: 1.1rem;
+  filter: drop-shadow(0 1px 3px rgba(0,0,0,.3));
 }
 
-.hiw-section-title {
-  font-size: .88rem;
-  font-weight: 700;
+/* ── Card ── */
+.ig-card {
+  position: relative;
   flex: 1;
-  text-align: left;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-top: 3px solid hsl(var(--hue) 70% 50%);
+  border-radius: 14px;
+  padding: 1.25rem 1.15rem 1rem;
+  box-shadow: 0 4px 20px rgba(0,0,0,.12),
+              0 0 0 0 hsl(var(--hue) 70% 50% / 0);
+  transition: box-shadow .3s ease, transform .3s ease;
+  overflow: hidden;
+}
+.ig-card:hover {
+  box-shadow: 0 8px 30px rgba(0,0,0,.15),
+              0 0 30px hsl(var(--hue) 70% 50% / .1);
+  transform: translateY(-2px);
 }
 
-.hiw-chevron {
-  color: var(--text-dim);
-  flex-shrink: 0;
-  transition: transform .3s cubic-bezier(.22,1,.36,1);
+/* Giant watermark number */
+.ig-watermark {
+  position: absolute;
+  top: -12px;
+  right: 8px;
+  font-size: 5.5rem;
+  font-weight: 900;
+  line-height: 1;
+  color: hsl(var(--hue) 60% 50% / .06);
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
 }
 
-.hiw-chevron--open {
-  transform: rotate(180deg);
-}
-
-/* Section body — slide-in */
-.hiw-section-body {
-  padding: 0 1.15rem 1.15rem;
-}
-.hiw-body-enter {
-  animation: hiwBodySlide .3s cubic-bezier(.22,1,.36,1);
-}
-@keyframes hiwBodySlide {
-  from { opacity: 0; transform: translateY(-10px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-.hiw-section-body p {
-  font-size: .82rem;
-  line-height: 1.65;
-  color: var(--text);
-  margin: 0 0 .65rem;
-}
-
-.hiw-subtitle {
-  font-size: .82rem;
-  font-weight: 700;
-  color: var(--accent);
-  margin: 1rem 0 .4rem;
-}
-
-/* ── Info Cards — glass depth ──────────────────────── */
-.hiw-infocard {
-  background: color-mix(in srgb, var(--bg-input) 80%, transparent);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
-  border-left: 3px solid var(--accent);
-  border-radius: var(--radius-sm);
-  padding: .8rem .95rem;
-  margin: .7rem 0;
-  transition: transform .25s ease, box-shadow .25s ease;
-  box-shadow: 0 2px 8px color-mix(in srgb, var(--accent) 5%, transparent);
-}
-
-.hiw-infocard:hover {
-  transform: translateX(4px);
-  box-shadow: 0 4px 16px color-mix(in srgb, var(--accent) 10%, transparent);
-}
-
-.hiw-infocard-header {
+/* Card head */
+.ig-card-head {
   display: flex;
   align-items: center;
-  gap: .4rem;
-  margin-bottom: .35rem;
-}
-
-.hiw-infocard-emoji {
-  font-size: 1rem;
-}
-
-.hiw-infocard-header strong {
-  font-size: .78rem;
-  color: var(--accent);
-}
-
-.hiw-infocard-body {
-  font-size: .78rem;
-  color: var(--text);
-  line-height: 1.55;
-}
-
-.hiw-infocard-body p {
-  margin: 0 0 .4rem;
-  font-size: .78rem;
-}
-
-/* ── Code Blocks — terminal-like 3D ── */
-.hiw-code {
-  font-family: var(--font-mono);
-  font-size: .72rem;
-  padding: .1rem .35rem;
-  border-radius: 3px;
-  background: color-mix(in srgb, var(--accent) 10%, transparent);
-  color: var(--accent);
-}
-
-.hiw-codeblock {
-  background: color-mix(in srgb, #000 40%, var(--bg-input));
-  border: 1px solid color-mix(in srgb, var(--accent) 15%, var(--border));
-  border-radius: var(--radius-sm);
-  margin: .6rem 0;
-  overflow: hidden;
-  box-shadow: inset 0 2px 8px rgba(0,0,0,.2), 0 2px 8px rgba(0,0,0,.1);
-  transition: box-shadow .25s ease;
-}
-
-.hiw-codeblock:hover {
-  box-shadow: inset 0 2px 8px rgba(0,0,0,.2), 0 4px 16px color-mix(in srgb, var(--accent) 8%, transparent);
-}
-
-.hiw-codeblock-title {
-  font-size: .66rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .06em;
-  color: var(--accent);
-  padding: .4rem .75rem;
-  background: color-mix(in srgb, var(--accent) 6%, var(--bg-card));
-  border-bottom: 1px solid color-mix(in srgb, var(--accent) 12%, var(--border));
-  /* Terminal dots */
+  gap: .5rem;
+  margin-bottom: .75rem;
   position: relative;
+  z-index: 1;
 }
 
-.hiw-codeblock-title::before {
-  content: "● ● ●";
-  position: absolute;
-  right: .75rem;
-  font-size: .5rem;
-  letter-spacing: .25em;
-  color: var(--text-dim);
-  opacity: .4;
+.ig-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 22px;
+  padding: 0 .45rem;
+  font-size: .6rem;
+  font-weight: 800;
+  color: #fff;
+  background: linear-gradient(135deg, hsl(var(--hue) 80% 55%), hsl(var(--hue) 65% 42%));
+  border-radius: 20px;
+  box-shadow: 0 2px 6px hsl(var(--hue) 80% 50% / .3);
+  flex-shrink: 0;
 }
 
-.hiw-codeblock pre {
-  font-family: var(--font-mono);
-  font-size: .72rem;
-  line-height: 1.6;
+.ig-card-title {
+  font-size: .9rem;
+  font-weight: 800;
   color: var(--text);
-  padding: .7rem .9rem;
   margin: 0;
-  overflow-x: auto;
-  white-space: pre;
 }
 
-/* ── Formula — glow border ── */
-.hiw-formula {
+.ig-card-body {
+  position: relative;
+  z-index: 1;
+}
+
+.ig-card-body > p {
+  font-size: .8rem;
+  line-height: 1.65;
+  color: var(--text);
+  margin: 0 0 .6rem;
+}
+
+.ig-label {
+  font-size: .8rem;
+  font-weight: 700;
+  color: hsl(var(--hue) 70% 50%);
+  margin: .85rem 0 .35rem;
+}
+
+/* ═══════════════════════════════════════════════════════
+   STAT CALLOUT — big bold numbers
+   ═══════════════════════════════════════════════════════ */
+.ig-stat-row {
+  display: flex;
+  gap: .5rem;
+  margin: .7rem 0;
+  flex-wrap: wrap;
+}
+
+.ig-stat {
+  flex: 1;
+  min-width: 80px;
+  text-align: center;
+  padding: .65rem .5rem;
+  border-radius: 10px;
+  background: linear-gradient(135deg,
+    hsl(var(--hue) 60% 50% / .08),
+    hsl(var(--hue) 60% 50% / .03));
+  border: 1px solid hsl(var(--hue) 50% 50% / .15);
+}
+
+.ig-stat-value {
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: hsl(var(--hue) 70% 55%);
+  font-family: var(--font-mono);
+  letter-spacing: -.02em;
+}
+
+.ig-stat-label {
+  font-size: .62rem;
+  font-weight: 600;
+  color: var(--text-dim);
+  margin-top: .15rem;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+
+/* ═══════════════════════════════════════════════════════
+   FORMULA
+   ═══════════════════════════════════════════════════════ */
+.ig-formula {
   font-family: var(--font-mono);
   font-size: .78rem;
   font-weight: 600;
   text-align: center;
-  padding: .6rem .8rem;
-  margin: .6rem 0;
-  background: color-mix(in srgb, var(--accent) 5%, var(--bg-input));
-  border: 1px dashed color-mix(in srgb, var(--accent) 30%, var(--border));
-  border-radius: var(--radius-sm);
-  color: var(--accent);
+  padding: .55rem .75rem;
+  margin: .55rem 0;
+  background: hsl(var(--hue) 50% 50% / .06);
+  border: 1px dashed hsl(var(--hue) 50% 50% / .25);
+  border-radius: 8px;
+  color: hsl(var(--hue) 65% 55%);
   overflow-x: auto;
-  box-shadow: 0 0 12px color-mix(in srgb, var(--accent) 6%, transparent);
-  transition: box-shadow .25s ease;
+  transition: box-shadow .2s ease;
+}
+.ig-formula:hover {
+  box-shadow: 0 0 16px hsl(var(--hue) 50% 50% / .12);
 }
 
-.hiw-formula:hover {
-  box-shadow: 0 0 20px color-mix(in srgb, var(--accent) 14%, transparent);
+/* ═══════════════════════════════════════════════════════
+   TERMINAL CODE BLOCK
+   ═══════════════════════════════════════════════════════ */
+.ig-terminal {
+  border-radius: 10px;
+  overflow: hidden;
+  margin: .6rem 0;
+  border: 1px solid color-mix(in srgb, var(--border) 60%, #000);
+  box-shadow: 0 4px 16px rgba(0,0,0,.2);
 }
 
-/* ── Tables — 3D row hover ── */
-.hiw-table-wrap {
+.ig-terminal-bar {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .4rem .7rem;
+  background: color-mix(in srgb, #000 50%, var(--bg-card));
+}
+
+.ig-terminal-dots {
+  display: flex;
+  gap: 5px;
+}
+.ig-terminal-dots i {
+  display: block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.ig-terminal-title {
+  font-size: .62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--text-dim);
+}
+
+.ig-terminal-code {
+  font-family: var(--font-mono);
+  font-size: .72rem;
+  line-height: 1.65;
+  color: var(--text);
+  padding: .7rem .85rem;
+  margin: 0;
+  overflow-x: auto;
+  white-space: pre;
+  background: color-mix(in srgb, #000 35%, var(--bg-input));
+}
+
+/* ═══════════════════════════════════════════════════════
+   CALLOUT
+   ═══════════════════════════════════════════════════════ */
+.ig-callout {
+  border-radius: 10px;
+  padding: .75rem .9rem;
+  margin: .6rem 0;
+  border: 1px solid;
+  transition: transform .2s ease;
+}
+.ig-callout:hover {
+  transform: translateX(3px);
+}
+
+.ig-callout--info {
+  background: hsl(var(--hue) 50% 50% / .06);
+  border-color: hsl(var(--hue) 50% 50% / .18);
+  border-left: 3px solid hsl(var(--hue) 60% 50%);
+}
+.ig-callout--warn {
+  background: hsl(35 90% 50% / .06);
+  border-color: hsl(35 90% 50% / .18);
+  border-left: 3px solid hsl(35 90% 50%);
+}
+.ig-callout--tip {
+  background: hsl(145 60% 45% / .06);
+  border-color: hsl(145 60% 45% / .18);
+  border-left: 3px solid hsl(145 60% 45%);
+}
+
+.ig-callout-head {
+  display: flex;
+  align-items: center;
+  gap: .35rem;
+  margin-bottom: .3rem;
+}
+.ig-callout-head strong {
+  font-size: .76rem;
+  color: var(--text);
+}
+
+.ig-callout-body {
+  font-size: .78rem;
+  color: var(--text);
+  line-height: 1.6;
+}
+.ig-callout-body p {
+  margin: 0 0 .35rem;
+  font-size: .78rem;
+}
+
+/* ═══════════════════════════════════════════════════════
+   TABLE
+   ═══════════════════════════════════════════════════════ */
+.ig-table-wrap {
   overflow-x: auto;
   margin: .6rem 0;
+  border-radius: 10px;
   border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  box-shadow: 0 2px 8px rgba(0,0,0,.08);
 }
 
-.hiw-table {
+.ig-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: .75rem;
+  font-size: .74rem;
 }
 
-.hiw-table th {
-  background: linear-gradient(135deg,
-    color-mix(in srgb, var(--accent) 10%, var(--bg-card)),
-    color-mix(in srgb, var(--accent) 5%, var(--bg-card)));
-  color: var(--accent);
+.ig-table th {
+  background: hsl(var(--hue) 50% 50% / .08);
+  color: hsl(var(--hue) 60% 55%);
   font-weight: 700;
   text-align: left;
-  padding: .55rem .7rem;
+  padding: .5rem .65rem;
   border-bottom: 1px solid var(--border);
-  font-size: .7rem;
+  font-size: .68rem;
   text-transform: uppercase;
   letter-spacing: .04em;
 }
 
-.hiw-table td {
-  padding: .5rem .7rem;
-  border-bottom: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
-  color: var(--text);
-  transition: transform .15s ease, background .15s ease;
-}
-
-.hiw-table tr:last-child td {
-  border-bottom: none;
-}
-
-.hiw-table tr:hover td {
-  background: color-mix(in srgb, var(--accent) 4%, var(--bg-hover));
-  transform: scale(1.005);
-}
-
-/* ── Visual steps — 3D numbered ── */
-.hiw-steps-visual {
-  margin: .7rem 0;
-}
-
-.hiw-step-v {
-  display: flex;
-  gap: .7rem;
-  padding: .6rem 0;
+.ig-table td {
+  padding: .45rem .65rem;
   border-bottom: 1px solid color-mix(in srgb, var(--border) 40%, transparent);
-  transition: transform .2s ease;
+  color: var(--text);
+  transition: background .15s ease;
 }
 
-.hiw-step-v:hover {
-  transform: translateX(4px);
+.ig-table tr:last-child td { border-bottom: none; }
+.ig-table tr:hover td {
+  background: hsl(var(--hue) 50% 50% / .04);
 }
 
-.hiw-step-v:last-child {
-  border-bottom: none;
+/* ═══════════════════════════════════════════════════════
+   STEPS — connected vertical mini-timeline
+   ═══════════════════════════════════════════════════════ */
+.ig-steps {
+  position: relative;
+  margin: .65rem 0;
+  padding-left: 18px;
+}
+/* Vertical connector line for steps */
+.ig-steps::before {
+  content: "";
+  position: absolute;
+  left: 11px;
+  top: 14px;
+  bottom: 14px;
+  width: 2px;
+  background: hsl(var(--hue) 50% 50% / .2);
+  border-radius: 2px;
 }
 
-.hiw-step-num {
+.ig-step {
+  display: flex;
+  gap: .6rem;
+  padding: .4rem 0;
+  position: relative;
+}
+
+.ig-step-num {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 26px;
-  height: 26px;
-  min-width: 26px;
+  width: 22px;
+  height: 22px;
+  min-width: 22px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 70%, var(--success)));
-  color: var(--text-inv);
-  font-size: .68rem;
+  background: hsl(var(--hue) 70% 50%);
+  color: #fff;
+  font-size: .6rem;
   font-weight: 800;
   flex-shrink: 0;
-  box-shadow: 0 2px 8px color-mix(in srgb, var(--accent) 30%, transparent);
+  box-shadow: 0 0 0 3px var(--bg-card),
+              0 2px 6px hsl(var(--hue) 70% 50% / .3);
+  position: relative;
+  z-index: 1;
 }
 
-.hiw-step-v p {
-  font-size: .78rem;
-  color: var(--text);
-  line-height: 1.55;
-  margin: 0;
-}
-
-.hiw-step-v div {
+.ig-step-content {
   flex: 1;
   min-width: 0;
-}
-
-.hiw-step-v div p {
-  margin-bottom: .35rem;
-}
-
-/* ── Reason list ── */
-.hiw-reason-list {
-  margin: 0;
-  padding-left: 1.2rem;
-}
-
-.hiw-reason-list li {
   font-size: .78rem;
   color: var(--text);
   line-height: 1.6;
-  margin-bottom: .3rem;
 }
 
-/* ── Responsive ── */
-@media (max-width: 580px) {
-  .hiw-container {
-    padding: 0 .25rem;
-    perspective: 800px;
+/* ═══════════════════════════════════════════════════════
+   FLIP CARDS — Glossary
+   ═══════════════════════════════════════════════════════ */
+.ig-flip-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: .5rem;
+}
+
+.ig-flip {
+  perspective: 600px;
+  cursor: pointer;
+  height: 90px;
+}
+
+.ig-flip-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform .5s cubic-bezier(.22,1,.36,1);
+  transform-style: preserve-3d;
+}
+
+.ig-flip--flipped .ig-flip-inner {
+  transform: rotateY(180deg);
+}
+
+.ig-flip-front, .ig-flip-back {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: .5rem;
+  text-align: center;
+  border: 1px solid var(--border);
+}
+
+.ig-flip-front {
+  background: linear-gradient(135deg,
+    hsl(var(--hue) 50% 50% / .08),
+    hsl(var(--hue) 50% 50% / .02));
+}
+
+.ig-flip-term {
+  font-size: .68rem;
+  font-weight: 700;
+  color: hsl(var(--hue) 65% 55%);
+}
+
+.ig-flip-local {
+  font-size: .62rem;
+  color: var(--text-dim);
+  margin-top: .15rem;
+}
+
+.ig-flip-back {
+  background: hsl(var(--hue) 50% 50% / .12);
+  transform: rotateY(180deg);
+}
+
+.ig-flip-back p {
+  font-size: .62rem;
+  color: var(--text);
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* ═══════════════════════════════════════════════════════
+   LIST
+   ═══════════════════════════════════════════════════════ */
+.ig-list {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+.ig-list li {
+  font-size: .78rem;
+  color: var(--text);
+  line-height: 1.6;
+  margin-bottom: .25rem;
+}
+
+/* ═══════════════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════════════ */
+@media (max-width: 700px) {
+  /* Collapse to single-column timeline */
+  .ig-timeline-line {
+    left: 20px;
   }
-  .hiw-hero {
-    padding: 1.5rem .75rem 1.2rem;
+  .ig-dot {
+    left: 20px;
+    width: 32px;
+    height: 32px;
   }
-  .hiw-hero-orb { width: 150px; height: 150px; top: -50px; right: -40px; }
-  .hiw-hero-title { font-size: 1.15rem; }
-  .hiw-hero-icon { font-size: 2.2rem; }
-  .hiw-flow {
-    gap: .15rem;
-    padding: .7rem .5rem;
+  .ig-dot-icon { font-size: .9rem; }
+
+  .ig-node--left,
+  .ig-node--right {
+    flex-direction: row;
   }
-  .hiw-flow-step {
-    min-width: 60px;
-    padding: .35rem .45rem;
+  .ig-node--left .ig-card,
+  .ig-node--right .ig-card {
+    margin-left: 52px;
+    margin-right: 0;
   }
-  .hiw-flow-label {
-    font-size: .6rem;
-  }
-  .hiw-arrow-svg { width: 16px; height: 16px; }
-  .hiw-section-header {
-    padding: .7rem .75rem;
-  }
-  .hiw-section-body {
-    padding: 0 .75rem .85rem;
-  }
-  .hiw-section-inner {
-    /* Disable 3D tilt on mobile */
-    transform: none !important;
-  }
-  .nav-tabs {
-    padding: 0 .75rem;
-  }
-  .nav-tab {
-    padding: .45rem .6rem;
-    font-size: .72rem;
-  }
+
+  .ig-hero { padding: 1.5rem .75rem 1.2rem; margin-bottom: 1.5rem; }
+  .ig-hero-title { font-size: 1.15rem; }
+  .ig-hero-icon { font-size: 2.2rem; }
+
+  .ig-pipeline { gap: .1rem; }
+  .ig-pipe-node { min-width: 56px; padding: .35rem .4rem; }
+  .ig-pipe-icon { font-size: 1.2rem; }
+  .ig-pipe-label { font-size: .56rem; }
+  .ig-pipe-svg { width: 22px; }
+
+  .ig-watermark { font-size: 3.5rem; }
+  .ig-card { padding: 1rem .85rem .85rem; }
+
+  .ig-flip-grid { grid-template-columns: repeat(2, 1fr); }
+  .ig-flip { height: 80px; }
+
+  .ig-stat-value { font-size: 1rem; }
 }
 
 /* ============================================================
