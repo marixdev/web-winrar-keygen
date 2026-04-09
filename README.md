@@ -21,9 +21,9 @@
 - **Multiple Encodings**  UTF-8, GBK, Big5, Shift-JIS for CJK compatibility.
 - **Cloudflare Turnstile**  Bot protection via invisible CAPTCHA challenge.
 - **Visit Counter**  Real-time visitor count via CountAPI.
-- **Responsive Design**  Works on desktop, tablet, and mobile.
 - **How It Works**  Detailed technical explanation of the math and cryptography behind WinRAR key generation.
 - **SEO Optimized**  Includes sitemap.xml, robots.txt, Open Graph meta tags.
+- **Responsive Design**  Works on desktop, tablet, and mobile.
 
 ## Tech Stack
 

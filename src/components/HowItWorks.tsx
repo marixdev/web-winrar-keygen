@@ -415,52 +415,8 @@ UID=abcdef1234567890abcd
         </InfoCard>
       </Section>
 
-      {/* Section 11: Summary */}
-      <Section icon="🎯" number={11} title={t.hiwS11Title}>
-        <CompareTable
-          headers={[t.hiwS11Component, t.hiwS11Desc]}
-          rows={[
-            [t.hiwS11Field, "GF((2¹⁵)¹⁷) — 255 bit"],
-            [t.hiwS11Curve, "y² + xy = x³ + 161"],
-            [t.hiwS11BasePoint, t.hiwS11BasePointV],
-            [t.hiwS11OrderN, "241 bit"],
-            ["Private Key", "240 bit, " + t.hiwS11FixedSeed],
-            ["Public Key", "P = k·G"],
-            ["Hash", "SHA-1 " + t.hiwS11Variant + " (240 bit)"],
-            [t.hiwS11Sig, "ECDSA: (r, s) ≤ 240 bit"],
-            ["Checksum", "CRC32 ~"],
-          ]}
-        />
-
-        <InfoCard emoji="🧩" title={t.hiwS11Why}>
-          <ol className="hiw-reason-list">
-            <li>{t.hiwS11Reason1}</li>
-            <li>{t.hiwS11Reason2}</li>
-            <li>{t.hiwS11Reason3}</li>
-          </ol>
-        </InfoCard>
-      </Section>
-
-      {/* Section 12: Glossary */}
-      <Section icon="📖" number={12} title={t.hiwS12Title}>
-        <CompareTable
-          headers={[t.hiwS12En, t.hiwS12Local, t.hiwS12Explain]}
-          rows={[
-            ["Galois Field (GF)", t.hiwS12GF, t.hiwS12GFDesc],
-            ["Irreducible Polynomial", t.hiwS12Irr, t.hiwS12IrrDesc],
-            ["Elliptic Curve", t.hiwS12EC, t.hiwS12ECDesc],
-            ["Base Point (G)", t.hiwS12BP, t.hiwS12BPDesc],
-            ["Private Key", t.hiwS12PK, t.hiwS12PKDesc],
-            ["Public Key", t.hiwS12PubK, t.hiwS12PubKDesc],
-            ["Digital Signature", t.hiwS12DS, t.hiwS12DSDesc],
-            ["XOR (⊕)", t.hiwS12XOR, t.hiwS12XORDesc],
-            ["ECDSA", t.hiwS12ECDS, t.hiwS12ECDSDesc],
-          ]}
-        />
-      </Section>
-
-      {/* Section 13: RAR Archive Creation */}
-      <Section icon="📦" number={13} title={t.hiwS13Title}>
+      {/* Section 11: RAR Archive Creation */}
+      <Section icon="📦" number={11} title={t.hiwS13Title}>
         <p className="hiw-paragraph">{t.hiwS13P1}</p>
 
         <InfoCard emoji="⚙️" title={t.hiwS13How}>
@@ -493,6 +449,50 @@ UID=abcdef1234567890abcd
             ]}
           />
         </InfoCard>
+      </Section>
+
+      {/* Section 12: Summary */}
+      <Section icon="🎯" number={12} title={t.hiwS11Title}>
+        <CompareTable
+          headers={[t.hiwS11Component, t.hiwS11Desc]}
+          rows={[
+            [t.hiwS11Field, "GF((2¹⁵)¹⁷) — 255 bit"],
+            [t.hiwS11Curve, "y² + xy = x³ + 161"],
+            [t.hiwS11BasePoint, t.hiwS11BasePointV],
+            [t.hiwS11OrderN, "241 bit"],
+            ["Private Key", "240 bit, " + t.hiwS11FixedSeed],
+            ["Public Key", "P = k·G"],
+            ["Hash", "SHA-1 " + t.hiwS11Variant + " (240 bit)"],
+            [t.hiwS11Sig, "ECDSA: (r, s) ≤ 240 bit"],
+            ["Checksum", "CRC32 ~"],
+          ]}
+        />
+
+        <InfoCard emoji="🧩" title={t.hiwS11Why}>
+          <ol className="hiw-reason-list">
+            <li>{t.hiwS11Reason1}</li>
+            <li>{t.hiwS11Reason2}</li>
+            <li>{t.hiwS11Reason3}</li>
+          </ol>
+        </InfoCard>
+      </Section>
+
+      {/* Section 13: Glossary */}
+      <Section icon="📖" number={13} title={t.hiwS12Title}>
+        <CompareTable
+          headers={[t.hiwS12En, t.hiwS12Local, t.hiwS12Explain]}
+          rows={[
+            ["Galois Field (GF)", t.hiwS12GF, t.hiwS12GFDesc],
+            ["Irreducible Polynomial", t.hiwS12Irr, t.hiwS12IrrDesc],
+            ["Elliptic Curve", t.hiwS12EC, t.hiwS12ECDesc],
+            ["Base Point (G)", t.hiwS12BP, t.hiwS12BPDesc],
+            ["Private Key", t.hiwS12PK, t.hiwS12PKDesc],
+            ["Public Key", t.hiwS12PubK, t.hiwS12PubKDesc],
+            ["Digital Signature", t.hiwS12DS, t.hiwS12DSDesc],
+            ["XOR (⊕)", t.hiwS12XOR, t.hiwS12XORDesc],
+            ["ECDSA", t.hiwS12ECDS, t.hiwS12ECDSDesc],
+          ]}
+        />
       </Section>
     </div>
   );
