@@ -23,8 +23,8 @@ export function runTest(): string {
       errors.push(`UID length: expected 20, got ${info.uid?.length}`);
     }
     
-    if (!info.items[0] || info.items[0].length !== 65) {
-      errors.push(`items[0] length: expected 65, got ${info.items[0]?.length}`);
+    if (!info.items[0] || info.items[0].length !== 64) {
+      errors.push(`items[0] length: expected 64, got ${info.items[0]?.length}`);
     }
     
     if (!info.items[1] || info.items[1].length !== 122) {
@@ -35,8 +35,8 @@ export function runTest(): string {
       errors.push(`items[2] length: expected 122, got ${info.items[2]?.length}`);
     }
     
-    if (!info.items[3] || info.items[3].length !== 51) {
-      errors.push(`items[3] length: expected 51, got ${info.items[3]?.length}`);
+    if (!info.items[3] || info.items[3].length !== 50) {
+      errors.push(`items[3] length: expected 50, got ${info.items[3]?.length}`);
     }
     
     if (info.hexData.length % 54 !== 0) {

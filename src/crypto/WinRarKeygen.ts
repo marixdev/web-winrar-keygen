@@ -68,10 +68,11 @@ function derivePrivateKey(seed: Uint8Array | null): bigint {
   for (let i = 0; i < 15; i++) {
     gen[0] = i + 1;
 
-    // Serialise generator[] as 24 bytes, each uint32 in big-endian
+    // Serialise generator[] as 24 bytes, each uint32 in little-endian
+    // (must match C++ native x86 memory layout fed to SHA-1)
     const buf = new Uint8Array(24);
     const bv = new DataView(buf.buffer);
-    for (let j = 0; j < 6; j++) bv.setUint32(j * 4, gen[j], false);
+    for (let j = 0; j < 6; j++) bv.setUint32(j * 4, gen[j], true);
 
     const digest = new SHA1().update(buf).evaluate();
     const dv = new DataView(digest.buffer, digest.byteOffset, digest.byteLength);
@@ -260,5 +261,5 @@ export function buildRegFileContent(info: RegisterInfo): string {
     lines.push(info.hexData.substring(i, i + 54));
   }
 
-  return lines.join('\n') + '\n';
+  return lines.join('\r\n') + '\r\n';
 }

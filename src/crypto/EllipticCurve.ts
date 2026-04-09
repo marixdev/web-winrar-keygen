@@ -151,7 +151,12 @@ export function ecPointDumpCompressed(P: ECPoint): Uint8Array {
 
   const ratio = gfDiv(P.y, P.x);         // y / x
   buf[0] = (ratio[0] & 1) ? 0x03 : 0x02;
-  buf.set(gfDump(P.x), 1);
+  const xDump = gfDump(P.x);
+  // Reverse to big-endian byte order (matching SEC 1 / C++ convention)
+  for (let lo = 0, hi = xDump.length - 1; lo < hi; lo++, hi--) {
+    const tmp = xDump[lo]; xDump[lo] = xDump[hi]; xDump[hi] = tmp;
+  }
+  buf.set(xDump, 1);
   return buf;
 }
 
