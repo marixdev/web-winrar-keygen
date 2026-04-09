@@ -1,6 +1,58 @@
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useI18n } from "../i18n";
 import { hiwTranslations } from "../i18n-hiw";
+
+/* ── Intersection Observer hook for scroll-reveal ── */
+function useReveal(threshold = 0.12) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([e]) => { if (e.isIntersecting) { setVisible(true); obs.unobserve(el); } },
+      { threshold },
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [threshold]);
+  return { ref, visible };
+}
+
+/* ── 3-D tilt on mouse move ── */
+function useTilt(intensity = 8) {
+  const ref = useRef<HTMLDivElement>(null);
+  const handleMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const el = ref.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width - 0.5;
+    const y = (e.clientY - r.top) / r.height - 0.5;
+    el.style.transform = `perspective(800px) rotateY(${x * intensity}deg) rotateX(${-y * intensity}deg) scale3d(1.01,1.01,1.01)`;
+  }, [intensity]);
+  const handleLeave = useCallback(() => {
+    const el = ref.current;
+    if (el) el.style.transform = "perspective(800px) rotateY(0) rotateX(0) scale3d(1,1,1)";
+  }, []);
+  return { ref, handleMove, handleLeave };
+}
+
+/* ── Floating particles in hero ── */
+function HeroParticles() {
+  return (
+    <div className="hiw-particles" aria-hidden="true">
+      {Array.from({ length: 18 }, (_, i) => (
+        <span key={i} className="hiw-particle" style={{
+          left: `${Math.random() * 100}%`,
+          animationDelay: `${Math.random() * 6}s`,
+          animationDuration: `${4 + Math.random() * 5}s`,
+          fontSize: `${6 + Math.random() * 10}px`,
+          opacity: 0.15 + Math.random() * 0.3,
+        }} />
+      ))}
+    </div>
+  );
+}
 
 interface SectionProps {
   icon: string;
@@ -8,21 +60,33 @@ interface SectionProps {
   title: string;
   children: React.ReactNode;
   defaultOpen?: boolean;
+  delay?: number;
 }
 
-function Section({ icon, number, title, children, defaultOpen = false }: SectionProps) {
+function Section({ icon, number, title, children, defaultOpen = false, delay = 0 }: SectionProps) {
   const [open, setOpen] = useState(defaultOpen);
+  const { ref, visible } = useReveal();
+  const tilt = useTilt(5);
+
   return (
-    <div className={`hiw-section ${open ? "hiw-section--open" : ""}`}>
-      <button className="hiw-section-header" onClick={() => setOpen(v => !v)}>
-        <span className="hiw-section-icon">{icon}</span>
-        <span className="hiw-section-num">{String(number).padStart(2, "0")}</span>
-        <span className="hiw-section-title">{title}</span>
-        <svg className={`hiw-chevron ${open ? "hiw-chevron--open" : ""}`} width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
-          <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
-        </svg>
-      </button>
-      {open && <div className="hiw-section-body">{children}</div>}
+    <div
+      ref={ref}
+      className={`hiw-section hiw-reveal ${visible ? "hiw-visible" : ""} ${open ? "hiw-section--open" : ""}`}
+      style={{ transitionDelay: `${delay}ms` }}
+    >
+      <div ref={tilt.ref} onMouseMove={tilt.handleMove} onMouseLeave={tilt.handleLeave} className="hiw-section-inner">
+        <button className="hiw-section-header" onClick={() => setOpen(v => !v)}>
+          <span className="hiw-section-icon">{icon}</span>
+          <span className="hiw-section-num">{String(number).padStart(2, "0")}</span>
+          <span className="hiw-section-title">{title}</span>
+          <svg className={`hiw-chevron ${open ? "hiw-chevron--open" : ""}`} width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
+          </svg>
+        </button>
+        {open && <div className="hiw-section-body hiw-body-enter">{children}</div>}
+      </div>
+      {/* Glow border effect */}
+      <div className="hiw-glow" />
     </div>
   );
 }
@@ -78,36 +142,37 @@ export default function HowItWorks() {
   return (
     <div className="hiw-container">
       <div className="hiw-hero">
+        <HeroParticles />
+        <div className="hiw-hero-orb" />
         <div className="hiw-hero-icon">🔐</div>
         <h1 className="hiw-hero-title">{t.hiwTitle}</h1>
         <p className="hiw-hero-subtitle">{t.hiwSubtitle}</p>
       </div>
 
-      {/* Flow overview */}
-      <div className="hiw-flow">
-        <div className="hiw-flow-step">
-          <div className="hiw-flow-icon">👤</div>
-          <div className="hiw-flow-label">{t.hiwFlowUser}</div>
-        </div>
-        <div className="hiw-flow-arrow">→</div>
-        <div className="hiw-flow-step">
-          <div className="hiw-flow-icon">🔑</div>
-          <div className="hiw-flow-label">{t.hiwFlowKey}</div>
-        </div>
-        <div className="hiw-flow-arrow">→</div>
-        <div className="hiw-flow-step">
-          <div className="hiw-flow-icon">✍️</div>
-          <div className="hiw-flow-label">{t.hiwFlowSign}</div>
-        </div>
-        <div className="hiw-flow-arrow">→</div>
-        <div className="hiw-flow-step">
-          <div className="hiw-flow-icon">📄</div>
-          <div className="hiw-flow-label">rarreg.key</div>
-        </div>
+      {/* Flow overview — 3D cards */}
+      <div className="hiw-flow hiw-glass">
+        {[
+          { icon: "👤", label: t.hiwFlowUser },
+          { icon: "🔑", label: t.hiwFlowKey },
+          { icon: "✍️", label: t.hiwFlowSign },
+          { icon: "📄", label: "rarreg.key" },
+        ].map((s, i, a) => (
+          <div key={i} className="hiw-flow-group">
+            <div className="hiw-flow-step hiw-float" style={{ animationDelay: `${i * 0.3}s` }}>
+              <div className="hiw-flow-icon">{s.icon}</div>
+              <div className="hiw-flow-label">{s.label}</div>
+            </div>
+            {i < a.length - 1 && <div className="hiw-flow-arrow">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="hiw-arrow-svg">
+                <path d="M5 12h14m0 0l-4-4m4 4l-4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>}
+          </div>
+        ))}
       </div>
 
       {/* Section 1: Overview */}
-      <Section icon="🌐" number={1} title={t.hiwS1Title} defaultOpen>
+      <Section icon="🌐" number={1} title={t.hiwS1Title} defaultOpen delay={0}>
         <p>{t.hiwS1P1}</p>
         <InfoCard emoji="⚡" title={t.hiwS1KeyPoint}>
           <p>{t.hiwS1P2}</p>
