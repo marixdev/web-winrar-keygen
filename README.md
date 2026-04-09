@@ -1,73 +1,148 @@
-# React + TypeScript + Vite
+﻿# WinRAR Keygen - Web Edition
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> **[wrkg.me](https://wrkg.me)**  Generate WinRAR license keys directly in your browser. No downloads, no installs, no server-side processing.
 
-Currently, two official plugins are available:
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![React](https://img.shields.io/badge/React-19-61dafb.svg)
+![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178c6.svg)
+![Vite](https://img.shields.io/badge/Vite-8-646cff.svg)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+---
 
-## React Compiler
+## Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **100% Client-Side**  All cryptographic operations run in your browser. No data is ever sent to a server.
+- **Pure TypeScript Crypto**  Clean-room implementation of GF(2^15), extension field GF((2^15)^17), elliptic curve operations, SHA-1, ECDSA signing, and CRC-32.
+- **Zero Crypto Dependencies**  No external crypto libraries. Only uses native Web APIs (`TextEncoder`, `crypto.getRandomValues`, `DataView`).
+- **14 Languages**  English, Vietnamese, Indonesian, Chinese, Korean, Japanese, French, German, Spanish, Thai, Malay, Russian, Filipino, Portuguese.
+- **Auto Language Detection**  Detects your language from IP geolocation (via ip-api.com) with browser locale fallback.
+- **Light & Dark Theme**  Toggle between light and dark mode, persisted in localStorage.
+- **Multiple Export Formats**  Copy to clipboard as text, or download as a `.rarreg.key` file.
+- **Multiple Encodings**  UTF-8, GBK, Big5, Shift-JIS for CJK compatibility.
+- **Cloudflare Turnstile**  Bot protection via invisible CAPTCHA challenge.
+- **Visit Counter**  Real-time visitor count via CountAPI.
+- **How It Works**  Detailed technical explanation of the math and cryptography behind WinRAR key generation.
+- **SEO Optimized**  Includes sitemap.xml, robots.txt, Open Graph meta tags.
+- **Responsive Design**  Works on desktop, tablet, and mobile.
 
-## Expanding the ESLint configuration
+## Tech Stack
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+| Layer | Technology |
+|-------|------------|
+| Framework | React 19 |
+| Language | TypeScript 6.0 |
+| Build Tool | Vite 8 |
+| Styling | Plain CSS with CSS variables (no framework) |
+| Crypto | Pure TypeScript (zero dependencies) |
+| Bot Protection | Cloudflare Turnstile |
+| Deployment | Vercel |
+| Domain | [wrkg.me](https://wrkg.me) |
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Project Structure
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```
+web-winrar-keygen/
+ public/                    # Static assets (favicons, robots.txt, sitemap.xml)
+ src/
+    components/
+       KeygenForm.tsx     # Main keygen form UI
+       HowItWorks.tsx     # Technical explanation page
+       LanguageSelector.tsx
+       ThemeToggle.tsx
+       TurnstileWidget.tsx
+       UsageGuide.tsx
+       VisitCounter.tsx
+    crypto/
+       GaloisField.ts     # GF(2^15) and GF((2^15)^17) arithmetic
+       EllipticCurve.ts   # EC point operations over GF((2^15)^17)
+       SHA1.ts            # SHA-1 hash (pure TypeScript)
+       BigIntUtils.ts     # Big integer utilities
+       CRC32.ts           # CRC-32 checksum
+       WinRarConfig.ts    # Curve parameters, generator point, public key
+       WinRarKeygen.ts    # Key generation (ECDSA signing)
+       RarArchive.ts      # rarreg.key file builder
+       Encoding.ts        # UTF-8, GBK, Big5, Shift-JIS encoding
+       verify.ts          # Test suite (24 tests)
+    locales/
+       *.json             # UI translations (14 languages)
+       hiw/*.json         # "How It Works" translations (14 languages)
+    App.tsx                # Main app with tab navigation
+    i18n.ts                # Internationalization system
+    i18n-hiw.ts            # HowItWorks i18n
+    theme.ts               # Theme context (light/dark)
+    main.tsx               # Entry point
+ index.html
+ package.json
+ vite.config.ts
+ vercel.json
+ tsconfig.json
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Cryptography Overview
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+The keygen implements the same elliptic curve signature scheme used by WinRAR's license validation:
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+1. **Finite Field**  Arithmetic in GF(2^15) with irreducible polynomial x^15 + x + 1, extended to GF((2^15)^17).
+2. **Elliptic Curve**  Curve y + xy = x + Ax + B over the extension field, with a specific generator point G of known order.
+3. **Key Derivation**  The license text (username + license type + UID + timestamp) is hashed with SHA-1, then an ECDSA-like signature is computed.
+4. **Encoding**  The signature is formatted as a `rarreg.key` file with CRC-32 checksums, matching WinRAR's expected format.
+
+All implementations are **clean-room TypeScript**  written independently from scratch based on the mathematical specifications.
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 18+
+- npm
+
+### Install & Run
+
+```bash
+# Clone the repository
+git clone https://github.com/marixdev/web-winrar-keygen.git
+cd web-winrar-keygen
+
+# Install dependencies
+npm install
+
+# Start dev server
+npm run dev
 ```
+
+### Build for Production
+
+```bash
+npm run build
+npm run preview
+```
+
+### Deploy to Vercel
+
+```bash
+# Install Vercel CLI
+npm i -g vercel
+
+# Deploy
+vercel --prod
+```
+
+## How to Use
+
+1. Visit **[wrkg.me](https://wrkg.me)**
+2. Enter any username (or leave the default)
+3. Select a license type
+4. Complete the Turnstile challenge
+5. Click **Generate**
+6. Copy the key text or download the `.rarreg.key` file
+7. Place `rarreg.key` in WinRAR's installation directory (e.g., `C:\Program Files\WinRAR\`)
+
+## License
+
+MIT
+
+---
+
+<p align="center">
+  <b>Made with math, not magic.</b>
+</p>
