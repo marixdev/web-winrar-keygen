@@ -4,13 +4,14 @@
  */
 
 import { generateRegisterInfo, buildRegFileContent } from "./crypto/WinRarKeygen";
+import { getEncoder, Encoding } from "./crypto/Encoding";
 
 export function runTest(): string {
   try {
     console.log("Starting key generation test...");
     const start = performance.now();
     
-    const info = generateRegisterInfo("Github", "Single PC usage license");
+    const info = generateRegisterInfo("Github", "Single PC usage license", getEncoder(Encoding.UTF8));
     
     const elapsed = performance.now() - start;
     console.log(`Key generated in ${elapsed.toFixed(0)}ms`);

@@ -1,24 +1,22 @@
 /**
- * Elliptic Curve over GF(2^m) — specifically GF((2^15)^17).
+ * Elliptic-curve arithmetic over the composite field GF((2¹⁵)¹⁷).
  *
- * Curve equation: y^2 + xy = x^3 + Ax^2 + B
+ * Curve equation:  y² + xy = x³ + Ax² + B
+ *
+ * - Point at infinity is represented as (0, 0).
+ * - Compressed encoding: 1-byte prefix (0x02 or 0x03) + 32-byte x-coordinate.
  */
 
-import type { GFElement } from "./GaloisField";
 import {
-  gfZero,
-  gfClone,
-  gfIsZero,
-  gfEqual,
-  gfAdd,
-  gfAddAssign,
-  gfAddOne,
-  gfMul,
-  gfSquare,
-  gfDiv,
-  gfDump,
-} from "./GaloisField";
-import { bigintFromBytes } from "./BigIntUtils";
+  type GFElement,
+  GF_ELEMENT_SIZE,
+  GF_DUMP_SIZE,
+  gfZero, gfClone, gfIsZero, gfEqual,
+  gfAdd, gfMul, gfSquare, gfDiv,
+  gfDump, gfLoad,
+} from './GaloisField';
+
+// ─── Types ───────────────────────────────────────────────────────────────────
 
 export interface ECCurve {
   A: GFElement;
@@ -26,199 +24,180 @@ export interface ECCurve {
 }
 
 export interface ECPoint {
-  curve: ECCurve;
   x: GFElement;
   y: GFElement;
 }
 
-export function ecPointCreate(curve: ECCurve): ECPoint {
-  return {
-    curve,
-    x: gfZero(),
-    y: gfZero(),
-  };
+// ─── Construction ────────────────────────────────────────────────────────────
+
+export function ecPointCreate(): ECPoint {
+  return { x: gfZero(), y: gfZero() };
 }
 
-export function ecPointFromCoords(
-  curve: ECCurve,
-  x: GFElement,
-  y: GFElement
-): ECPoint {
-  // Verify: y^2 + xy = x^3 + Ax^2 + B
-  // Left = y^2 + xy
-  const left = gfAdd(gfSquare(y), gfMul(x, y));
-  // Right = (x + A) * x^2 + B
-  const xPlusA = gfAdd(x, curve.A);
-  const x2 = gfSquare(x);
-  const right = gfAdd(gfMul(xPlusA, x2), curve.B);
-  
-  if (!gfEqual(left, right)) {
-    throw new Error("Point is not on the curve.");
-  }
-
-  return {
-    curve,
-    x: gfClone(x),
-    y: gfClone(y),
-  };
+export function ecPointFromCoords(x: GFElement, y: GFElement): ECPoint {
+  return { x: gfClone(x), y: gfClone(y) };
 }
 
-export function ecPointClone(p: ECPoint): ECPoint {
-  return {
-    curve: p.curve,
-    x: gfClone(p.x),
-    y: gfClone(p.y),
-  };
+export function ecPointClone(P: ECPoint): ECPoint {
+  return { x: gfClone(P.x), y: gfClone(P.y) };
 }
 
-export function ecPointIsAtInfinity(p: ECPoint): boolean {
-  return gfIsZero(p.x) && gfIsZero(p.y);
+// ─── Predicates ──────────────────────────────────────────────────────────────
+
+export function ecPointIsAtInfinity(P: ECPoint): boolean {
+  return gfIsZero(P.x) && gfIsZero(P.y);
 }
 
-export function ecPointEqual(a: ECPoint, b: ECPoint): boolean {
-  return gfEqual(a.x, b.x) && gfEqual(a.y, b.y);
+export function ecPointEqual(P: ECPoint, Q: ECPoint): boolean {
+  return gfEqual(P.x, Q.x) && gfEqual(P.y, Q.y);
 }
 
-export function ecPointNegate(p: ECPoint): ECPoint {
-  return {
-    curve: p.curve,
-    x: gfClone(p.x),
-    y: gfAdd(p.x, p.y),
-  };
+// ─── Negate ──────────────────────────────────────────────────────────────────
+
+/** −P = (x, x + y)  on a Binary EC. */
+export function ecPointNegate(P: ECPoint): ECPoint {
+  return { x: gfClone(P.x), y: gfAdd(P.x, P.y) };
 }
+
+// ─── Doubling ────────────────────────────────────────────────────────────────
 
 /**
- * Point doubling: 2P
+ * Point doubling.
+ *
+ * m = x + y/x
+ * x' = m² + m + A
+ * y' = x² + (m + 1) · x'
  */
-export function ecPointDouble(p: ECPoint): ECPoint {
-  if (ecPointIsAtInfinity(p)) {
-    return ecPointCreate(p.curve);
-  }
+export function ecPointDouble(curve: ECCurve, P: ECPoint): ECPoint {
+  if (ecPointIsAtInfinity(P) || gfIsZero(P.x)) return ecPointCreate();
 
-  // m = X + Y / X
-  const m = gfAdd(gfDiv(p.y, p.x), p.x);
+  const m = gfAdd(P.x, gfDiv(P.y, P.x));
 
-  // NewX = m^2 + m + A
-  let newX = gfSquare(m);
-  gfAddAssign(newX, m);
-  gfAddAssign(newX, p.curve.A);
+  const newX = gfAdd(gfAdd(gfSquare(m), m), curve.A);
 
-  // NewY = X^2 + (m + 1) * NewX
-  const mPlusOne = gfAddOne(m);
-  let newY = gfMul(mPlusOne, newX);
-  gfAddAssign(newY, gfSquare(p.x));
+  // m + 1
+  const m1 = new Uint16Array(GF_ELEMENT_SIZE);
+  m1.set(m); m1[0] ^= 1;
 
-  return {
-    curve: p.curve,
-    x: newX,
-    y: newY,
-  };
+  const newY = gfAdd(gfSquare(P.x), gfMul(m1, newX));
+
+  return { x: newX, y: newY };
 }
 
+// ─── Addition ────────────────────────────────────────────────────────────────
+
 /**
- * Point addition: P + Q
+ * Point addition P + Q.
+ *
+ * m = (y₀ + y₁) / (x₀ + x₁)
+ * x' = m² + m + x₀ + x₁ + A
+ * y' = m(x₀ + x') + x' + y₀
  */
-export function ecPointAdd(p: ECPoint, q: ECPoint): ECPoint {
-  if (ecPointIsAtInfinity(p)) {
-    return ecPointClone(q);
-  }
-  if (ecPointIsAtInfinity(q)) {
-    return ecPointClone(p);
+export function ecPointAdd(curve: ECCurve, P: ECPoint, Q: ECPoint): ECPoint {
+  if (ecPointIsAtInfinity(P)) return ecPointClone(Q);
+  if (ecPointIsAtInfinity(Q)) return ecPointClone(P);
+
+  if (gfEqual(P.x, Q.x)) {
+    // Same x: either P = Q (double) or P = −Q (infinity)
+    return gfEqual(P.y, Q.y)
+      ? ecPointDouble(curve, P)
+      : ecPointCreate();
   }
 
-  if (gfEqual(p.x, q.x)) {
-    if (gfEqual(p.y, q.y)) {
-      // Same point -> double
-      return ecPointDouble(p);
-    } else {
-      // P + (-P) = O (point at infinity)
-      return ecPointCreate(p.curve);
+  const dx = gfAdd(P.x, Q.x);
+  const dy = gfAdd(P.y, Q.y);
+  const m  = gfDiv(dy, dx);
+
+  const newX = gfAdd(gfAdd(gfAdd(gfSquare(m), m), dx), curve.A);
+  const newY = gfAdd(gfAdd(gfMul(m, gfAdd(P.x, newX)), newX), P.y);
+
+  return { x: newX, y: newY };
+}
+
+// ─── Scalar multiplication (double-and-add, MSB first) ───────────────────────
+
+export function ecPointMul(curve: ECCurve, P: ECPoint, k: bigint): ECPoint {
+  if (k === 0n) return ecPointCreate();
+  if (k < 0n) return ecPointMul(curve, ecPointNegate(P), -k);
+
+  let R = ecPointCreate();
+  const bitLen = k.toString(2).length;
+
+  for (let i = bitLen - 1; i >= 0; i--) {
+    R = ecPointDouble(curve, R);
+    if ((k >> BigInt(i)) & 1n) {
+      R = ecPointAdd(curve, R, P);
     }
   }
+  return R;
+}
 
-  // m = (Y0 + Y1) / (X0 + X1)
-  const m = gfDiv(gfAdd(p.y, q.y), gfAdd(p.x, q.x));
+// ─── Compressed serialisation ────────────────────────────────────────────────
 
-  // NewX = m^2 + m + X0 + X1 + A
-  let newX = gfSquare(m);
-  gfAddAssign(newX, m);
-  gfAddAssign(newX, p.x);
-  gfAddAssign(newX, q.x);
-  gfAddAssign(newX, p.curve.A);
+/**
+ * Dump a point in compressed form:  prefix (1 byte) ‖ x (32 bytes).
+ *
+ * prefix = 0x04  if point is at infinity
+ *          0x02  if y/x has its constant-term bit clear
+ *          0x03  if y/x has its constant-term bit set
+ */
+export function ecPointDumpCompressed(P: ECPoint): Uint8Array {
+  const buf = new Uint8Array(1 + GF_DUMP_SIZE);   // 33 bytes
 
-  // NewY = m * (X0 + NewX) + NewX + Y0
-  let newY = gfMul(m, gfAdd(p.x, newX));
-  gfAddAssign(newY, newX);
-  gfAddAssign(newY, p.y);
+  if (ecPointIsAtInfinity(P)) {
+    buf[0] = 0x04;
+    return buf;
+  }
 
-  return {
-    curve: p.curve,
-    x: newX,
-    y: newY,
-  };
+  const ratio = gfDiv(P.y, P.x);         // y / x
+  buf[0] = (ratio[0] & 1) ? 0x03 : 0x02;
+  buf.set(gfDump(P.x), 1);
+  return buf;
 }
 
 /**
- * Scalar multiplication: k * P using double-and-add.
+ * Restore a point from its compressed form.
+ *
+ * To decompress we must solve  t² + t = x + A + B/x²  where  t = y/x,
+ * then check which solution matches the stored parity bit.
  */
-export function ecPointMul(p: ECPoint, k: bigint): ECPoint {
-  if (k === 0n) {
-    return ecPointCreate(p.curve);
-  }
-  if (k < 0n) {
-    return ecPointMul(ecPointNegate(p), -k);
-  }
+export function ecPointLoadCompressed(curve: ECCurve, data: Uint8Array): ECPoint {
+  if (data[0] === 0x04) return ecPointCreate();
 
-  let result = ecPointCreate(p.curve);
-  let addend = ecPointClone(p);
+  const x = gfLoad(data.subarray(1, 1 + GF_DUMP_SIZE));
+  if (gfIsZero(x)) throw new RangeError('Cannot decompress: x = 0');
 
-  let scalar = k;
-  while (scalar > 0n) {
-    if (scalar & 1n) {
-      result = ecPointAdd(result, addend);
-    }
-    addend = ecPointDouble(addend);
-    scalar >>= 1n;
-  }
+  // Solve  t² + t = x + A + B/x²   (half-trace method for GF(2^odd))
+  const rhs = gfAdd(gfAdd(x, curve.A), gfDiv(curve.B, gfSquare(x)));
+  const t = halfTrace(rhs);
 
-  return result;
+  // Verify solution
+  const check = gfAdd(gfSquare(t), t);
+  if (!gfEqual(check, rhs)) throw new RangeError('No solution — invalid compressed point');
+
+  // Choose the root whose constant bit matches the prefix
+  const parityBit = (data[0] === 0x03) ? 1 : 0;
+  const tFinal = (t[0] & 1) === parityBit ? t : gfAdd(t, gfFromOne());
+
+  // y = t · x
+  const y = gfMul(tFinal, x);
+  return { x, y };
 }
 
-/**
- * Dump the X coordinate of a point in compressed format.
- * Returns [prefix_byte, ...x_bytes].
- * prefix = 0x02 if LSB(Y/X) == 0, 0x03 if LSB(Y/X) == 1.
- */
-export function ecPointDumpCompressed(p: ECPoint): Uint8Array {
-  const xDump = gfDump(p.x);
-
-  // Determine prefix: check if Y/X has LSB set (bit 0 of dump byte 0)
-  let prefix = 0x02;
-  if (!gfIsZero(p.x)) {
-    const yDivX = gfDiv(p.y, p.x);
-    const zDump = gfDump(yDivX);
-    if (zDump[0] & 1) {
-      prefix = 0x03;
-    }
+/** Compute half-trace:  HT(a) = Σ_{i=0}^{(m-1)/2} a^{2^{2i}}  in GF(2^m), m odd.
+ *  For our field m = 255. */
+function halfTrace(a: GFElement): GFElement {
+  let r = gfClone(a);
+  for (let i = 1; i <= 127; i++) {
+    r = gfSquare(gfSquare(r));   // r = r^{4}
+    r = gfAdd(r, a);
   }
-
-  // Reverse x bytes to big-endian
-  const xBytesBE = new Uint8Array(xDump.length);
-  for (let i = 0; i < xDump.length; i++) {
-    xBytesBE[i] = xDump[xDump.length - 1 - i];
-  }
-
-  const result = new Uint8Array(1 + xBytesBE.length);
-  result[0] = prefix;
-  result.set(xBytesBE, 1);
-  return result;
+  return r;
 }
 
-/**
- * Get the X coordinate of a point as a BigInt.
- * Dump the GF element, interpret as big-endian bytes → BigInt.
- */
-export function ecPointGetXAsBigInt(p: ECPoint): bigint {
-  const dump = gfDump(p.x);
-  return bigintFromBytes(dump, true); // little-endian dump
+/** One as a GFElement (used for root selection). */
+function gfFromOne(): GFElement {
+  const e = new Uint16Array(GF_ELEMENT_SIZE);
+  e[0] = 1;
+  return e;
 }

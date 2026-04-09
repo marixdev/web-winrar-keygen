@@ -1,44 +1,62 @@
 /**
- * CRC32 implementation with configurable polynomial.
+ * CRC-32 with the standard reflected polynomial 0xEDB88320.
+ *
+ * Provides both a stateful class (for incremental updates) and a
+ * one-shot `crc32` function.
  */
 
-const POLYNOMIAL = 0xEDB88320;
+// ─── Lookup table (256 entries, computed once) ───────────────────────────────
 
-// Build lookup table
-const crc32Table: Uint32Array = new Uint32Array(256);
-for (let i = 0; i < 256; i++) {
-  let result = i;
-  for (let j = 0; j < 8; j++) {
-    if (result & 1) {
-      result = (result >>> 1) ^ POLYNOMIAL;
-    } else {
-      result = result >>> 1;
+const TABLE = new Uint32Array(256);
+{
+  for (let i = 0; i < 256; i++) {
+    let c = i;
+    for (let j = 0; j < 8; j++) {
+      c = (c & 1) ? (0xedb88320 ^ (c >>> 1)) : (c >>> 1);
     }
+    TABLE[i] = c >>> 0;
   }
-  crc32Table[i] = result;
 }
 
+// ─── Streaming class ─────────────────────────────────────────────────────────
+
 export class CRC32 {
-  private value: number = 0;
+  private crc = 0xffffffff;
 
-  update(data: Uint8Array): void {
-    let crc = ~this.value >>> 0;
+  /** Feed raw bytes. */
+  update(data: Uint8Array): this {
+    let c = this.crc;
     for (let i = 0; i < data.length; i++) {
-      crc = (crc >>> 8) ^ crc32Table[(crc ^ data[i]) & 0xff];
+      c = TABLE[(c ^ data[i]) & 0xff] ^ (c >>> 8);
     }
-    this.value = (~crc) >>> 0;
+    this.crc = c >>> 0;
+    return this;
   }
 
-  updateString(str: string): void {
-    const encoder = new TextEncoder();
-    this.update(encoder.encode(str));
+  /** Feed a UTF-8 encoded string. */
+  updateString(s: string): this {
+    return this.update(new TextEncoder().encode(s));
   }
 
+  /** Return the finalised CRC-32 value. */
   evaluate(): number {
-    return this.value;
+    return (this.crc ^ 0xffffffff) >>> 0;
   }
 
-  reset(): void {
-    this.value = 0;
+  /** Reset for reuse. */
+  reset(): this {
+    this.crc = 0xffffffff;
+    return this;
   }
+}
+
+// ─── One-shot helper ─────────────────────────────────────────────────────────
+
+/** Compute CRC-32 of a byte array in one call. */
+export function crc32(data: Uint8Array): number {
+  let c = 0xffffffff;
+  for (let i = 0; i < data.length; i++) {
+    c = TABLE[(c ^ data[i]) & 0xff] ^ (c >>> 8);
+  }
+  return (c ^ 0xffffffff) >>> 0;
 }

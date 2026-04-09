@@ -1,22 +1,26 @@
 /**
- * WinRAR Keygen — core key generation and signing logic.
+ * WinRAR keygen — key generation and registration-file formatting.
+ *
+ * Public API consumed by the UI:
+ *   - RegisterInfo         (type)
+ *   - generateRegisterInfo (main entry point)
+ *   - buildRegFileContent  (formats the .key file text)
  */
 
-import { SHA1 } from "./SHA1";
-import { CRC32 } from "./CRC32";
+import { SHA1 } from './SHA1';
+import { CRC32 } from './CRC32';
+import { gfDump } from './GaloisField';
+import { ecPointMul, ecPointDumpCompressed } from './EllipticCurve';
+import { CURVE, G, ORDER, PRIVATE_KEY } from './WinRarConfig';
 import {
   bigintFromBytes,
   bigintFromUint16LE,
-  bigintToHex,
-  bigintMod,
   bigintSetBit,
-} from "./BigIntUtils";
-import { gfDump } from "./GaloisField";
-import {
-  ecPointMul,
-  ecPointDumpCompressed,
-} from "./EllipticCurve";
-import { G, ORDER, PRIVATE_KEY } from "./WinRarConfig";
+  bigintMod,
+  bigintToHex,
+} from './BigIntUtils';
+
+// ─── Types ───────────────────────────────────────────────────────────────────
 
 export interface RegisterInfo {
   userName: string;
@@ -27,340 +31,234 @@ export interface RegisterInfo {
   hexData: string;
 }
 
-// ---- Private Key Generation ----
+// ─── Internal: private-key derivation ────────────────────────────────────────
 
-function generatePrivateKey(seed: Uint8Array | null): bigint {
-  const generator = new Uint32Array(6);
-  const rawPrivateKey = new Uint16Array(15);
+/**
+ * Derive a 240-bit private key from an optional seed.
+ *
+ * When seed is null the hardcoded generator constants are used (producing
+ * the canonical WinRAR private key).  When a seed is provided the generator
+ * is seeded by SHA-1(seed).
+ *
+ * Algorithm:
+ *   1. Set generator[1..5] from either the hardcoded values or SHA-1(seed).
+ *   2. For i in 0..14:
+ *        generator[0] = i + 1
+ *        digest = SHA-1(generator as 24 raw bytes, big-endian)
+ *        rawKey[i] = first 2 bytes of digest interpreted as uint32 BE, kept as uint16
+ *   3. Interpret the 15 × uint16 array as a 240-bit LE integer.
+ */
+function derivePrivateKey(seed: Uint8Array | null): bigint {
+  const gen = new Uint32Array(6);
 
-  if (seed && seed.length > 0) {
-    const sha1 = new SHA1();
-    sha1.update(seed);
-    const digest = sha1.evaluate();
+  if (seed !== null && seed.length > 0) {
+    const digest = new SHA1().update(seed).evaluate();
     const dv = new DataView(digest.buffer, digest.byteOffset, digest.byteLength);
-    for (let i = 0; i < 5; i++) {
-      // Read digest as big-endian uint32 (SHA-1 native byte order)
-      generator[i + 1] = dv.getUint32(i * 4, false);
-    }
+    for (let i = 0; i < 5; i++) gen[i + 1] = dv.getUint32(i * 4, false);
   } else {
-    generator[1] = 0xeb3eb781;
-    generator[2] = 0x50265329;
-    generator[3] = 0xdc5ef4a3;
-    generator[4] = 0x6847b9d5;
-    generator[5] = 0xcde43b4c;
+    gen[1] = 0xeb3eb781;
+    gen[2] = 0x50265329;
+    gen[3] = 0xdc5ef4a3;
+    gen[4] = 0x6847b9d5;
+    gen[5] = 0xcde43b4c;
   }
+
+  const rawKey = new Uint16Array(15);
 
   for (let i = 0; i < 15; i++) {
-    const sha1 = new SHA1();
-    generator[0] = i + 1;
+    gen[0] = i + 1;
 
-    // Pass raw bytes of the uint32 array (little-endian byte order)
-    sha1.update(new Uint8Array(generator.buffer));
-    const digest = sha1.evaluate();
+    // Serialise generator[] as 24 bytes, each uint32 in big-endian
+    const buf = new Uint8Array(24);
+    const bv = new DataView(buf.buffer);
+    for (let j = 0; j < 6; j++) bv.setUint32(j * 4, gen[j], false);
 
-    // Read first 32 bits of digest as big-endian
-    const digestView = new DataView(digest.buffer, digest.byteOffset, digest.byteLength);
-    const val = digestView.getUint32(0, false);
-    rawPrivateKey[i] = val & 0xffff;
+    const digest = new SHA1().update(buf).evaluate();
+    const dv = new DataView(digest.buffer, digest.byteOffset, digest.byteLength);
+    rawKey[i] = dv.getUint32(0, false) & 0xffff;   // keep low 16 bits of first BE uint32
   }
 
-  return bigintFromUint16LE(rawPrivateKey);
+  // Interpret 15 × uint16 as a little-endian 240-bit integer
+  return bigintFromUint16LE(rawKey, 15);
 }
 
-// ---- Public Key Generation ----
+// ─── Internal: compressed public key in hex ──────────────────────────────────
 
-function compressPublicKeyHex(
-  message: string,
-  encode: (s: string) => Uint8Array = (s) => new TextEncoder().encode(s)
-): string {
-  const seed = encode(message);
-  const privateKey = generatePrivateKey(seed);
-  const publicKey = ecPointMul(G, privateKey);
-  const compressed = ecPointDumpCompressed(publicKey);
+/**
+ * Compute a compressed public-key hex string (64 hex chars).
+ *
+ * 1. privateKey  = derivePrivateKey(encode(message))
+ * 2. publicKey   = G × privateKey
+ * 3. compressed  = prefix (1 byte) + x (32 bytes)
+ * 4. xInteger    = bigint(x, BE) × 2;  if prefix == 0x03 → set bit 0
+ * 5. Return as 64-char lowercase hex.
+ */
+function compressedPublicKeyHex(message: string, encode: (s: string) => Uint8Array): string {
+  const key = derivePrivateKey(encode(message));
+  const pub = ecPointMul(CURVE, G, key);
+  const comp = ecPointDumpCompressed(pub);
 
-  // compressed = [prefix_byte, ...x_bytes(32)] in BIG-ENDIAN
-  // PublicKeyXInteger = BigInt from x_bytes
-  const xBytes = compressed.subarray(1);
-  let publicKeyXInteger = bigintFromBytes(xBytes, false); // Big-endian
+  // comp[0] = prefix (0x02 or 0x03), comp[1..32] = x coordinate
+  let xInt = bigintFromBytes(comp.subarray(1));
+  xInt *= 2n;
+  if (comp[0] === 0x03) xInt = bigintSetBit(xInt, 0);
 
-  publicKeyXInteger *= 2n; // 256 bits at most
-  if (compressed[0] === 0x03) {
-    // LSB(Y/X) == 1
-    publicKeyXInteger = bigintSetBit(publicKeyXInteger, 0);
-  }
-
-  let hexStr = bigintToHex(publicKeyXInteger);
-  // Pad to 64 chars (32 bytes * 2)
-  while (hexStr.length < 64) {
-    hexStr = "0" + hexStr;
-  }
-
-  return hexStr;
+  return bigintToHex(xInt, 64);
 }
 
-// ---- Random Integer ----
+// ─── Internal: hash integer ──────────────────────────────────────────────────
 
-function generateRandomInteger(): bigint {
-  const raw = new Uint16Array(15);
-  const cryptoRandom = new Uint8Array(30);
-  crypto.getRandomValues(cryptoRandom);
-  for (let i = 0; i < 15; i++) {
-    raw[i] = (cryptoRandom[i * 2] | (cryptoRandom[i * 2 + 1] << 8)) & 0xffff;
-  }
-  return bigintFromUint16LE(raw);
+/**
+ * Generate a 240-bit hash integer from raw message bytes.
+ *
+ * 1. SHA-1(message) → 5 × uint32 (big-endian)
+ * 2. Append 5 fixed uint32 constants
+ * 3. Interpret first 30 bytes (= 15 × uint16) as LE integer
+ */
+function hashInteger(data: Uint8Array): bigint {
+  const digest = new SHA1().update(data).evaluate();
+  const dv = new DataView(digest.buffer, digest.byteOffset, digest.byteLength);
+
+  const raw = new Uint32Array(10);
+  for (let i = 0; i < 5; i++) raw[i] = dv.getUint32(i * 4, false);
+
+  // Fixed tail constants (SHA-1 of empty string with zeroed IV)
+  raw[5] = 0x0ffd8d43;
+  raw[6] = 0xb4e33c7c;
+  raw[7] = 0x53461bd1;
+  raw[8] = 0x0f27a546;
+  raw[9] = 0x1050d90d;
+
+  // Reinterpret as uint16 LE array, take first 15 (= 240 bits)
+  const u16 = new Uint16Array(raw.buffer, 0, 15);
+  return bigintFromUint16LE(u16, 15);
 }
 
-// ---- Hash Integer ----
+// ─── Internal: ECDSA-variant signing ─────────────────────────────────────────
 
-function generateHashInteger(message: Uint8Array): bigint {
-  const sha1 = new SHA1();
-  sha1.update(message);
-  const digest = sha1.evaluate();
-
-  const rawHash = new Uint32Array(10);
-  const digestView = new DataView(digest.buffer, digest.byteOffset, digest.byteLength);
-
-  for (let i = 0; i < 5; i++) {
-    // Read digest as big-endian uint32 (SHA-1 native byte order)
-    rawHash[i] = digestView.getUint32(i * 4, false);
-  }
-
-  // SHA1("") with all-zeroed initial value
-  rawHash[5] = 0x0ffd8d43;
-  rawHash[6] = 0xb4e33c7c;
-  rawHash[7] = 0x53461bd1;
-  rawHash[8] = 0x0f27a546;
-  rawHash[9] = 0x1050d90d;
-
-  // Take first 240 bits (30 bytes) from the uint32 array in LE byte order
-  const fullBytes = new Uint8Array(rawHash.buffer);
-  return bigintFromBytes(fullBytes.subarray(0, 30), true);
-}
-
-// ---- ECDSA Sign ----
-
-interface ECCSignature {
+interface Signature {
   r: bigint;
   s: bigint;
 }
 
-function sign(data: Uint8Array): ECCSignature {
-  const hash = generateHashInteger(data);
+function sign(data: Uint8Array): Signature {
+  const hash = hashInteger(data);
 
-  while (true) {
-    const random = generateRandomInteger();
+  for (;;) {
+    // Generate 240-bit random integer (15 × random uint16)
+    const rndBuf = new Uint8Array(30);
+    crypto.getRandomValues(rndBuf);
+    const u16 = new Uint16Array(15);
+    const rdv = new DataView(rndBuf.buffer);
+    for (let i = 0; i < 15; i++) u16[i] = rdv.getUint16(i * 2, true);
+    const random = bigintFromUint16LE(u16, 15);
 
-    // Calculate r
-    const rPoint = ecPointMul(G, random);
-    const rXDump = gfDump(rPoint.x);
-    let r = bigintFromBytes(rXDump, true);
-    r = bigintMod(r + hash, ORDER);
+    // r = (x-coord of G×random  as LE integer) + hash   (mod ORDER)
+    const Rpoint = ecPointMul(CURVE, G, random);
+    const xBytes = gfDump(Rpoint.x);                         // 32 bytes LE
+    const xInt   = bigintFromUint16LE(new Uint16Array(xBytes.buffer, xBytes.byteOffset, 16), 16);
+    let r = bigintMod(xInt + hash, ORDER);
+    if (r === 0n || r + random === ORDER) continue;
 
-    if (r === 0n || r + random === ORDER) {
-      continue;
-    }
-
-    // Calculate s
+    // s = (random − PRIVATE_KEY × r) mod ORDER
     let s = bigintMod(random - PRIVATE_KEY * r, ORDER);
-
-    if (s === 0n) {
-      continue;
-    }
+    if (s === 0n) continue;
 
     return { r, s };
   }
 }
 
-// ---- Checksum ----
+// ─── Internal: CRC-32 checksum ───────────────────────────────────────────────
 
-function calculateChecksum(
-  info: {
-    licenseType: string;
-    userName: string;
-    items: [string, string, string, string];
-  },
-  encode: (s: string) => Uint8Array = (s) => new TextEncoder().encode(s)
+function calcChecksum(
+  licenseType: string,
+  userName: string,
+  items: [string, string, string, string],
 ): number {
   const crc = new CRC32();
-  crc.update(encode(info.licenseType));
-  crc.update(encode(info.userName));
-  crc.update(encode(info.items[0]));
-  crc.update(encode(info.items[1]));
-  crc.update(encode(info.items[2]));
-  crc.update(encode(info.items[3]));
+  crc.updateString(licenseType);
+  crc.updateString(userName);
+  for (const item of items) crc.updateString(item);
   return (~crc.evaluate()) >>> 0;
 }
 
-// ---- Main Keygen Function ----
+// ─── Public API ──────────────────────────────────────────────────────────────
 
+/**
+ * Generate a complete WinRAR registration blob.
+ *
+ * @param userName    - Display name (already preprocessed by Encoding module)
+ * @param licenseType - e.g. "Single PC usage license"
+ * @param encode      - Function that converts a JS string to the bytes
+ *                      WinRAR would see (UTF-8 or Windows-1252).
+ */
 export function generateRegisterInfo(
   userName: string,
   licenseType: string,
-  stringToBytes?: (s: string) => Uint8Array
+  encode: (s: string) => Uint8Array,
 ): RegisterInfo {
-  const encode = stringToBytes ?? ((s: string) => new TextEncoder().encode(s));
-  const items: [string, string, string, string] = ["", "", "", ""];
+  // First public-key compression (keyed on userName)
+  const temp = compressedPublicKeyHex(userName, encode);
 
-  let temp = compressPublicKeyHex(userName, encode);
-  items[3] = sprintf("60%.48s", temp);
-  items[0] = compressPublicKeyHex(items[3], encode);
-  const uid = sprintf("%.16s%.4s", temp.substring(48), items[0]);
+  const items: [string, string, string, string] = ['', '', '', ''];
+  items[3] = '60' + temp.substring(0, 48);
+
+  // Second compression (keyed on items[3])
+  items[0] = compressedPublicKeyHex(items[3], encode);
+
+  const uid = temp.substring(48) + items[0].substring(0, 4);  // 16 + 4 = 20
 
   // Sign license type
-  while (true) {
-    const ltSig = sign(encode(licenseType));
-    let sigR = bigintToHex(ltSig.r);
-    let sigS = bigintToHex(ltSig.s);
-
-    while (sigR.length < 60) sigR = "0" + sigR;
-    while (sigS.length < 60) sigS = "0" + sigS;
-
-    if (sigR.length === 60 && sigS.length === 60) {
-      items[1] = "60" + sigS + sigR;
+  for (;;) {
+    const sig = sign(encode(licenseType));
+    const hexS = bigintToHex(sig.s, 60);
+    const hexR = bigintToHex(sig.r, 60);
+    if (hexS.length === 60 && hexR.length === 60) {
+      items[1] = '60' + hexS + hexR;
       break;
     }
   }
 
-  // Sign username + items[0]
-  temp = userName + items[0];
-  while (true) {
-    const unSig = sign(encode(temp));
-    let sigR = bigintToHex(unSig.r);
-    let sigS = bigintToHex(unSig.s);
-
-    while (sigR.length < 60) sigR = "0" + sigR;
-    while (sigS.length < 60) sigS = "0" + sigS;
-
-    if (sigR.length === 60 && sigS.length === 60) {
-      items[2] = "60" + sigS + sigR;
+  // Sign (userName + items[0])
+  for (;;) {
+    const sig = sign(encode(userName + items[0]));
+    const hexS = bigintToHex(sig.s, 60);
+    const hexR = bigintToHex(sig.r, 60);
+    if (hexS.length === 60 && hexR.length === 60) {
+      items[2] = '60' + hexS + hexR;
       break;
     }
   }
 
-  const checksum = calculateChecksum({ licenseType, userName, items }, encode);
+  const checksum = calcChecksum(licenseType, userName, items);
 
-  const hexData = sprintf(
-    "%d%d%d%d%s%s%s%s%010d",
-    items[0].length,
-    items[1].length,
-    items[2].length,
-    items[3].length,
-    items[0],
-    items[1],
-    items[2],
-    items[3],
-    checksum
-  );
+  // Build hex data line:  <4 lengths><4 items><10-digit checksum>
+  const hexData =
+    `${items[0].length}${items[1].length}${items[2].length}${items[3].length}` +
+    items.join('') +
+    checksum.toString(10).padStart(10, '0');
 
   if (hexData.length % 54 !== 0) {
-    throw new Error(
-      "InternalError: The length of register data is not correct."
-    );
+    throw new Error('Internal error: hex data length is not a multiple of 54.');
   }
 
-  return {
-    userName,
-    licenseType,
-    uid,
-    items,
-    checksum,
-    hexData,
-  };
+  return { userName, licenseType, uid, items, checksum, hexData };
 }
 
-// ---- Helper: sprintf-like formatting ----
-
-function sprintf(format: string, ...args: (string | number)[]): string {
-  let result = "";
-  let argIdx = 0;
-  let i = 0;
-
-  while (i < format.length) {
-    if (format[i] === "%" && i + 1 < format.length) {
-      i++;
-      let width = "";
-      let zeroPad = false;
-      let precision = -1;
-
-      // Check for zero padding
-      if (format[i] === "0") {
-        zeroPad = true;
-        i++;
-      }
-
-      // Parse width
-      while (i < format.length && format[i] >= "0" && format[i] <= "9") {
-        width += format[i];
-        i++;
-      }
-
-      // Parse precision
-      if (i < format.length && format[i] === ".") {
-        i++;
-        let precStr = "";
-        while (i < format.length && format[i] >= "0" && format[i] <= "9") {
-          precStr += format[i];
-          i++;
-        }
-        precision = parseInt(precStr, 10);
-      }
-
-      if (i < format.length) {
-        const spec = format[i];
-        i++;
-
-        if (spec === "s") {
-          let s = String(args[argIdx++]);
-          if (precision >= 0) {
-            s = s.substring(0, precision);
-          }
-          result += s;
-        } else if (spec === "d" || spec === "u") {
-          let numStr = String(Math.abs(Number(args[argIdx++])));
-          const w = parseInt(width, 10) || 0;
-          while (numStr.length < w) {
-            numStr = (zeroPad ? "0" : " ") + numStr;
-          }
-          result += numStr;
-        } else if (spec === "l") {
-          // %lu - unsigned long
-          if (i < format.length && format[i] === "u") {
-            i++;
-            let numStr = String(Number(args[argIdx++]) >>> 0);
-            const w = parseInt(width, 10) || 0;
-            while (numStr.length < w) {
-              numStr = (zeroPad ? "0" : " ") + numStr;
-            }
-            result += numStr;
-          }
-        } else if (spec === "z") {
-          // %zu - size_t
-          if (i < format.length && format[i] === "u") {
-            i++;
-            result += String(args[argIdx++]);
-          }
-        } else {
-          result += spec;
-        }
-      }
-    } else {
-      result += format[i];
-      i++;
-    }
-  }
-
-  return result;
-}
-
-// ---- Build registration file content ----
-
+/**
+ * Format the text content of a rarreg.key file.
+ */
 export function buildRegFileContent(info: RegisterInfo): string {
-  let s = "RAR registration data\r\n";
-  s += info.userName + "\r\n";
-  s += info.licenseType + "\r\n";
-  s += "UID=" + info.uid + "\r\n";
+  const lines: string[] = [];
+  lines.push('RAR registration data');
+  lines.push(info.userName);
+  lines.push(info.licenseType);
+  lines.push(`UID=${info.uid}`);
+
+  // Split hexData into 54-char lines
   for (let i = 0; i < info.hexData.length; i += 54) {
-    s += info.hexData.substring(i, i + 54) + "\r\n";
+    lines.push(info.hexData.substring(i, i + 54));
   }
-  return s;
+
+  return lines.join('\n') + '\n';
 }

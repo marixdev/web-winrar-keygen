@@ -1,140 +1,117 @@
 /**
- * Minimal RAR4 archive builder.
- * Creates a valid RAR archive containing a single STORED (uncompressed) file.
- * Used to produce `rarkey.rar` containing `rarreg.key`.
+ * RAR4-format archive builder.
  *
- * RAR4 format reference:
- *   - Marker block (7 bytes)
- *   - Archive header (HEAD_TYPE=0x73, 13 bytes)
- *   - File header  (HEAD_TYPE=0x74, 32 + nameLen bytes) + file data
- *   - End of archive (HEAD_TYPE=0x7B, 7 bytes)
- *
- * CRC for headers = CRC32(data from HEAD_TYPE onwards) & 0xFFFF
+ * Creates a minimal valid .rar file containing a single stored (uncompressed)
+ * file.  Used to package rarreg.key for convenient download.
  */
 
-// ---- CRC32 table (same polynomial as standard CRC-32) ----
-const CRC32_TABLE = new Uint32Array(256);
-for (let i = 0; i < 256; i++) {
-  let c = i;
-  for (let j = 0; j < 8; j++) {
-    c = c & 1 ? (c >>> 1) ^ 0xedb88320 : c >>> 1;
-  }
-  CRC32_TABLE[i] = c;
+import { crc32 } from './CRC32';
+
+// ─── RAR constants ───────────────────────────────────────────────────────────
+
+/** RAR 4.x signature (7 bytes). */
+const RAR_SIGNATURE = new Uint8Array([0x52, 0x61, 0x72, 0x21, 0x1a, 0x07, 0x00]);
+
+/** Block types. */
+const BLOCK_ARCHIVE = 0x73;
+const BLOCK_FILE    = 0x74;
+const BLOCK_END     = 0x7b;
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+/** Write a uint16 LE into buf at offset. */
+function put16(buf: Uint8Array, off: number, val: number): void {
+  buf[off]     = val & 0xff;
+  buf[off + 1] = (val >>> 8) & 0xff;
 }
 
-function crc32(data: Uint8Array): number {
-  let crc = 0xffffffff;
-  for (let i = 0; i < data.length; i++) {
-    crc = (crc >>> 8) ^ CRC32_TABLE[(crc ^ data[i]) & 0xff];
-  }
-  return (crc ^ 0xffffffff) >>> 0;
-}
-
-function crc16FromCrc32(data: Uint8Array): number {
-  return crc32(data) & 0xffff;
-}
-
-/** Convert a Date to MS-DOS date/time packed into a uint32 (little-endian semantics). */
-function dosDateTime(d: Date): number {
-  const sec = Math.floor(d.getSeconds() / 2) & 0x1f;
-  const min = d.getMinutes() & 0x3f;
-  const hour = d.getHours() & 0x1f;
-  const day = d.getDate() & 0x1f;
-  const month = (d.getMonth() + 1) & 0x0f;
-  const year = (d.getFullYear() - 1980) & 0x7f;
-
-  const time = (hour << 11) | (min << 5) | sec;
-  const date = (year << 9) | (month << 5) | day;
-  return (date << 16) | time;
+/** Write a uint32 LE into buf at offset. */
+function put32(buf: Uint8Array, off: number, val: number): void {
+  buf[off]     = val & 0xff;
+  buf[off + 1] = (val >>> 8) & 0xff;
+  buf[off + 2] = (val >>> 16) & 0xff;
+  buf[off + 3] = (val >>> 24) & 0xff;
 }
 
 /**
- * Build a valid RAR4 archive containing a single file.
+ * Compute the header CRC-16 used in RAR blocks.
+ * It is just the low 16 bits of CRC-32 over the header bytes starting
+ * after the 2-byte CRC field itself.
+ */
+function headerCrc16(header: Uint8Array, start: number): number {
+  return crc32(header.subarray(start)) & 0xffff;
+}
+
+// ─── Build archive ───────────────────────────────────────────────────────────
+
+/**
+ * Build a RAR4 archive containing one stored file.
  *
- * @param fileName  Name of the file inside the archive (e.g. "rarreg.key")
- * @param fileData  Raw file content as Uint8Array
- * @returns         Complete RAR archive as Uint8Array
+ * @param fileName  Name of the file inside the archive (ASCII).
+ * @param fileData  Raw content of the file.
+ * @returns         Complete .rar file as Uint8Array.
  */
 export function buildRar4Archive(fileName: string, fileData: Uint8Array): Uint8Array {
-  const encoder = new TextEncoder();
-  const nameBytes = encoder.encode(fileName);
+  const nameBytes = new TextEncoder().encode(fileName);
+  const dataLen   = fileData.length;
+  const dataCrc   = crc32(fileData);
 
-  // ---- 1. Marker block (7 bytes) ----
-  const marker = new Uint8Array([0x52, 0x61, 0x72, 0x21, 0x1a, 0x07, 0x00]);
+  // ── Marker block (7 bytes) ──
+  // The RAR marker block IS the signature bytes.  In practice the signature
+  // already serves this purpose so we just prepend it.
 
-  // ---- 2. Archive header (13 bytes) ----
-  // HEAD_TYPE=0x73, HEAD_FLAGS=0x0000, HEAD_SIZE=13
-  // Reserved1=0x0000, Reserved2=0x00000000
-  const archHdr = new Uint8Array(13);
-  const archView = new DataView(archHdr.buffer);
-  // archHdr[0..1] = HEAD_CRC (filled later)
-  archHdr[2] = 0x73; // HEAD_TYPE
-  archView.setUint16(3, 0x0000, true); // HEAD_FLAGS
-  archView.setUint16(5, 13, true); // HEAD_SIZE
-  archView.setUint16(7, 0, true); // Reserved1
-  archView.setUint32(9, 0, true); // Reserved2
-  // Calculate CRC over bytes 2..12 (HEAD_TYPE onwards)
-  const archCrc = crc16FromCrc32(archHdr.subarray(2));
-  archView.setUint16(0, archCrc, true);
+  // ── Archive header block ──
+  // SIZE = 7 bytes (HEAD_CRC 2 + HEAD_TYPE 1 + HEAD_FLAGS 2 + HEAD_SIZE 2)
+  const archHdr = new Uint8Array(7);
+  archHdr[2] = BLOCK_ARCHIVE;
+  put16(archHdr, 3, 0x0000);         // flags
+  put16(archHdr, 5, 7);              // header size
+  put16(archHdr, 0, headerCrc16(archHdr, 2));
 
-  // ---- 3. File header + data ----
-  const fileHeaderSize = 32 + nameBytes.length;
-  const fileHdr = new Uint8Array(fileHeaderSize);
-  const fhView = new DataView(fileHdr.buffer);
+  // ── File header block ──
+  // Base header = 32 + nameBytes.length
+  const fileHdrSize = 32 + nameBytes.length;
+  const fileHdr = new Uint8Array(fileHdrSize);
 
-  const fileCrc = crc32(fileData);
-  const now = new Date();
-  const dosTime = dosDateTime(now);
+  fileHdr[2] = BLOCK_FILE;
+  // flags: 0x8000 = ADD_SIZE flag (header is followed by file data)
+  put16(fileHdr, 3, 0x8000);
+  put16(fileHdr, 5, fileHdrSize);     // header size
 
-  // fhView[0..1] = HEAD_CRC (filled later)
-  fileHdr[2] = 0x74; // HEAD_TYPE = FILE_HEAD
-  fhView.setUint16(3, 0x8000, true); // HEAD_FLAGS: 0x8000 = LONG_BLOCK (data follows header)
-  fhView.setUint16(5, fileHeaderSize, true); // HEAD_SIZE
-  fhView.setUint32(7, fileData.length, true); // PACK_SIZE (= UNP_SIZE for STORE)
-  fhView.setUint32(11, fileData.length, true); // UNP_SIZE
-  fileHdr[15] = 2; // HOST_OS: 2 = Win32
-  fhView.setUint32(16, fileCrc, true); // FILE_CRC
-  fhView.setUint32(20, dosTime, true); // FTIME
-  fileHdr[24] = 20; // UNP_VER: version needed to extract (2.0)
-  fileHdr[25] = 0x30; // METHOD: 0x30 = STORE (no compression)
-  fhView.setUint16(26, nameBytes.length, true); // NAME_SIZE
-  fhView.setUint32(28, 0x20, true); // ATTR: FILE_ATTRIBUTE_ARCHIVE
-  // File name
+  put32(fileHdr, 7, dataLen);          // compressed size (= uncompressed, stored)
+  put32(fileHdr, 11, dataLen);         // uncompressed size
+
+  fileHdr[15] = 0x20;                 // HOST_OS = Win32
+  put32(fileHdr, 16, dataCrc);         // FILE_CRC
+  put32(fileHdr, 20, 0);              // FTIME (unused)
+
+  fileHdr[24] = 20;                   // UNPACK_VER = 2.0
+  fileHdr[25] = 0x30;                 // METHOD = storing (0x30)
+
+  put16(fileHdr, 26, nameBytes.length);   // NAME_SIZE
+  put32(fileHdr, 28, 0x20);           // ATTR = Archive attribute
+
   fileHdr.set(nameBytes, 32);
 
-  // Calculate header CRC over bytes 2..end
-  const fhCrc = crc16FromCrc32(fileHdr.subarray(2));
-  fhView.setUint16(0, fhCrc, true);
+  put16(fileHdr, 0, headerCrc16(fileHdr, 2));
 
-  // ---- 4. End of archive (7 bytes) ----
+  // ── End-of-archive block ──
   const endHdr = new Uint8Array(7);
-  const endView = new DataView(endHdr.buffer);
-  // endHdr[0..1] = HEAD_CRC (filled later)
-  endHdr[2] = 0x7b; // HEAD_TYPE = ENDARC_HEAD
-  endView.setUint16(3, 0x4000, true); // HEAD_FLAGS
-  endView.setUint16(5, 7, true); // HEAD_SIZE
-  const endCrc = crc16FromCrc32(endHdr.subarray(2));
-  endView.setUint16(0, endCrc, true);
+  endHdr[2] = BLOCK_END;
+  put16(endHdr, 3, 0x4000);          // flags: ENDARC_HEAD_FLAGS
+  put16(endHdr, 5, 7);
+  put16(endHdr, 0, headerCrc16(endHdr, 2));
 
-  // ---- Assemble ----
-  const totalSize =
-    marker.length + archHdr.length + fileHdr.length + fileData.length + endHdr.length;
-  const archive = new Uint8Array(totalSize);
-  let offset = 0;
+  // ── Concatenate everything ──
+  const total = RAR_SIGNATURE.length + archHdr.length + fileHdr.length + dataLen + endHdr.length;
+  const out = new Uint8Array(total);
+  let pos = 0;
 
-  archive.set(marker, offset);
-  offset += marker.length;
+  out.set(RAR_SIGNATURE, pos); pos += RAR_SIGNATURE.length;
+  out.set(archHdr, pos);       pos += archHdr.length;
+  out.set(fileHdr, pos);       pos += fileHdr.length;
+  out.set(fileData, pos);      pos += dataLen;
+  out.set(endHdr, pos);
 
-  archive.set(archHdr, offset);
-  offset += archHdr.length;
-
-  archive.set(fileHdr, offset);
-  offset += fileHdr.length;
-
-  archive.set(fileData, offset);
-  offset += fileData.length;
-
-  archive.set(endHdr, offset);
-
-  return archive;
+  return out;
 }

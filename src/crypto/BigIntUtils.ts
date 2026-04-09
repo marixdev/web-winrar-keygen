@@ -1,145 +1,64 @@
 /**
- * Utility functions for BigInt <-> byte array conversions.
- * Replaces GMP's mpz_import / mpz_export functionality.
+ * BigInt ↔ byte-array conversion utilities.
+ *
+ * All functions work with unsigned big-endian or little-endian byte arrays
+ * and native ES2020 BigInt.
  */
 
-/**
- * Import a BigInt from a byte array.
- * @param data - Uint8Array of bytes
- * @param littleEndian - if true, first byte is least significant
- * @returns BigInt value (always non-negative)
- */
-export function bigintFromBytes(
-  data: Uint8Array,
-  littleEndian: boolean
-): bigint {
-  let result = 0n;
-  if (littleEndian) {
-    for (let i = data.length - 1; i >= 0; i--) {
-      result = (result << 8n) | BigInt(data[i]);
-    }
-  } else {
-    for (let i = 0; i < data.length; i++) {
-      result = (result << 8n) | BigInt(data[i]);
-    }
+/** Convert a byte array (big-endian) to a non-negative BigInt. */
+export function bigintFromBytes(bytes: Uint8Array): bigint {
+  let n = 0n;
+  for (const b of bytes) n = (n << 8n) | BigInt(b);
+  return n;
+}
+
+/** Convert a non-negative BigInt to a big-endian byte array of `length` bytes. */
+export function bigintToBytes(n: bigint, length: number): Uint8Array {
+  const out = new Uint8Array(length);
+  let v = n;
+  for (let i = length - 1; i >= 0; i--) {
+    out[i] = Number(v & 0xffn);
+    v >>= 8n;
   }
-  return result;
+  return out;
 }
 
 /**
- * Export a BigInt to a byte array.
- * @param value - non-negative BigInt
- * @param length - desired output length in bytes (zero-padded)
- * @param littleEndian - if true, first byte is least significant
- * @returns Uint8Array
+ * Interpret an array of uint16 values as a little-endian base-65536 number.
+ * i.e. result = Σ items[i] · 2^{16i}
  */
-export function bigintToBytes(
-  value: bigint,
-  length: number,
-  littleEndian: boolean
-): Uint8Array {
-  if (value < 0n) {
-    throw new Error("bigintToBytes: negative values not supported");
+export function bigintFromUint16LE(items: ArrayLike<number>, count: number): bigint {
+  let n = 0n;
+  for (let i = count - 1; i >= 0; i--) {
+    n = (n << 16n) | BigInt(items[i] & 0xffff);
   }
-  const result = new Uint8Array(length);
-  let v = value;
-  if (littleEndian) {
-    for (let i = 0; i < length; i++) {
-      result[i] = Number(v & 0xffn);
-      v >>= 8n;
-    }
-  } else {
-    for (let i = length - 1; i >= 0; i--) {
-      result[i] = Number(v & 0xffn);
-      v >>= 8n;
-    }
-  }
-  return result;
+  return n;
 }
 
-/**
- * Import a BigInt from a Uint16Array (little-endian words).
- * Each element is a 16-bit word, word[0] is least significant.
- */
-export function bigintFromUint16LE(data: Uint16Array): bigint {
-  let result = 0n;
-  for (let i = data.length - 1; i >= 0; i--) {
-    result = (result << 16n) | BigInt(data[i]);
-  }
-  return result;
+/** Number of significant bits in a BigInt (0n → 0). */
+export function bigintBitLength(n: bigint): number {
+  if (n <= 0n) return 0;
+  // toString(2) is the simplest portable approach
+  return n.toString(2).length;
 }
 
-/**
- * Reverse bytes of a 32-bit integer (byte-swap).
- */
-export function bswap32(x: number): number {
-  return (
-    (((x & 0xff) << 24) |
-      ((x & 0xff00) << 8) |
-      ((x & 0xff0000) >>> 8) |
-      ((x & 0xff000000) >>> 24)) >>>
-    0
-  );
+/** Set bit `idx` (0-based from LSB) of BigInt `n`. */
+export function bigintSetBit(n: bigint, idx: number): bigint {
+  return n | (1n << BigInt(idx));
 }
 
-/**
- * Convert SHA-1 digest (20 bytes big-endian) to array of 5 uint32
- * read in little-endian order.
- */
-export function sha1DigestToUint32Swapped(digest: Uint8Array): Uint32Array {
-  const view = new DataView(digest.buffer, digest.byteOffset, digest.byteLength);
-  const result = new Uint32Array(5);
-  for (let i = 0; i < 5; i++) {
-    // Read as big-endian (which is SHA-1's native output), then bswap.
-    // bswap of big-endian read = little-endian read
-    result[i] = view.getUint32(i * 4, true); // read little-endian
-  }
-  return result;
+/** Test whether bit `idx` (0-based from LSB) is set. */
+export function bigintTestBit(n: bigint, idx: number): boolean {
+  return ((n >> BigInt(idx)) & 1n) === 1n;
 }
 
-/**
- * Get the bit length of a BigInt
- */
-export function bigintBitLength(value: bigint): number {
-  if (value === 0n) return 0;
-  let v = value < 0n ? -value : value;
-  let bits = 0;
-  while (v > 0n) {
-    bits++;
-    v >>= 1n;
-  }
-  return bits;
-}
-
-/**
- * Set a specific bit of a BigInt
- */
-export function bigintSetBit(value: bigint, bit: number): bigint {
-  return value | (1n << BigInt(bit));
-}
-
-/**
- * Test a specific bit of a BigInt
- */
-export function bigintTestBit(value: bigint, bit: number): boolean {
-  return (value & (1n << BigInt(bit))) !== 0n;
-}
-
-/**
- * Modular operation that always returns non-negative result (like GMP's mpz_fdiv_r)
- */
+/** Non-negative modulus (always returns a value in [0, m)). */
 export function bigintMod(a: bigint, m: bigint): bigint {
   const r = a % m;
   return r < 0n ? r + m : r;
 }
 
-/**
- * Convert a BigInt to hex string (lowercase), without '0x' prefix.
- */
-export function bigintToHex(value: bigint): string {
-  if (value < 0n) {
-    throw new Error("bigintToHex: negative values not supported");
-  }
-  if (value === 0n) return "0";
-  return value.toString(16);
+/** Convert a BigInt to a zero-padded hex string of `digits` characters. */
+export function bigintToHex(n: bigint, digits: number): string {
+  return n.toString(16).padStart(digits, '0');
 }

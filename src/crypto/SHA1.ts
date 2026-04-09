@@ -1,148 +1,154 @@
 /**
- * Pure TypeScript SHA-1 implementation.
+ * SHA-1 hash implementation (FIPS PUB 180-4).
  *
- * NOTE: This implementation uses a ZEROED initial state (all zeros)
- * instead of the standard SHA-1 constants {0x67452301, 0xEFCDAB89, ...}.
- * WinRAR keygen intentionally uses an all-zero initial state.
+ * Provides a streaming interface: create, update with bytes or strings,
+ * then evaluate to obtain the 20-byte digest.
  */
 
-function rotateLeft(x: number, n: number): number {
+// ─── Constants ───────────────────────────────────────────────────────────────
+
+const IV: readonly number[] = [
+  0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476, 0xc3d2e1f0,
+];
+
+// ─── 32-bit helpers ──────────────────────────────────────────────────────────
+
+function rotl32(x: number, n: number): number {
   return ((x << n) | (x >>> (32 - n))) >>> 0;
 }
 
-function processBlock(state: Uint32Array, block: Uint8Array): void {
-  const w = new Uint32Array(80);
-
-  for (let i = 0; i < 16; i++) {
-    w[i] =
-      ((block[i * 4] << 24) |
-        (block[i * 4 + 1] << 16) |
-        (block[i * 4 + 2] << 8) |
-        block[i * 4 + 3]) >>>
-      0;
-  }
-  for (let i = 16; i < 80; i++) {
-    w[i] = rotateLeft((w[i - 3] ^ w[i - 8] ^ w[i - 14] ^ w[i - 16]) >>> 0, 1);
-  }
-
-  let a = state[0],
-    b = state[1],
-    c = state[2],
-    d = state[3],
-    e = state[4];
-
-  for (let i = 0; i < 80; i++) {
-    let f: number, k: number;
-    if (i < 20) {
-      f = ((b & c) | (~b & d)) >>> 0;
-      k = 0x5a827999;
-    } else if (i < 40) {
-      f = (b ^ c ^ d) >>> 0;
-      k = 0x6ed9eba1;
-    } else if (i < 60) {
-      f = ((b & c) | (b & d) | (c & d)) >>> 0;
-      k = 0x8f1bbcdc;
-    } else {
-      f = (b ^ c ^ d) >>> 0;
-      k = 0xca62c1d6;
-    }
-
-    const temp = (rotateLeft(a, 5) + f + e + k + w[i]) >>> 0;
-    e = d;
-    d = c;
-    c = rotateLeft(b, 30);
-    b = a;
-    a = temp;
-  }
-
-  state[0] = (state[0] + a) >>> 0;
-  state[1] = (state[1] + b) >>> 0;
-  state[2] = (state[2] + c) >>> 0;
-  state[3] = (state[3] + d) >>> 0;
-  state[4] = (state[4] + e) >>> 0;
+function toU32(x: number): number {
+  return x >>> 0;
 }
 
-export class SHA1 {
-  private state: Uint32Array;
-  private count: number = 0;
-  private buffer: Uint8Array = new Uint8Array(64);
+// ─── Block processing ────────────────────────────────────────────────────────
 
-  constructor() {
-    // Standard SHA-1 initial values
-    this.state = new Uint32Array([
-      0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476, 0xc3d2e1f0,
-    ]);
+function processBlock(state: Uint32Array, block: DataView, offset: number): void {
+  const W = new Uint32Array(80);
+
+  for (let t = 0; t < 16; t++) {
+    W[t] = block.getUint32(offset + t * 4, false);  // big-endian
+  }
+  for (let t = 16; t < 80; t++) {
+    W[t] = rotl32(W[t - 3] ^ W[t - 8] ^ W[t - 14] ^ W[t - 16], 1);
   }
 
-  update(data: Uint8Array): void {
-    let offset = 0;
-    const bufferIndex = this.count % 64;
-    this.count += data.length;
+  let [a, b, c, d, e] = state;
 
-    let remaining = data.length;
-    let bufIdx = bufferIndex;
+  for (let t = 0; t < 80; t++) {
+    let f: number, K: number;
+    if (t < 20) {
+      f = (b & c) | (~b & d);
+      K = 0x5a827999;
+    } else if (t < 40) {
+      f = b ^ c ^ d;
+      K = 0x6ed9eba1;
+    } else if (t < 60) {
+      f = (b & c) | (b & d) | (c & d);
+      K = 0x8f1bbcdc;
+    } else {
+      f = b ^ c ^ d;
+      K = 0xca62c1d6;
+    }
 
-    if (bufIdx > 0) {
-      const toCopy = Math.min(64 - bufIdx, remaining);
-      this.buffer.set(data.subarray(0, toCopy), bufIdx);
-      bufIdx += toCopy;
-      offset += toCopy;
-      remaining -= toCopy;
-      if (bufIdx === 64) {
-        processBlock(this.state, this.buffer);
-        bufIdx = 0;
+    const temp = toU32(rotl32(a, 5) + toU32(f) + e + K + W[t]);
+    e = d; d = c; c = rotl32(b, 30); b = a; a = temp;
+  }
+
+  state[0] = toU32(state[0] + a);
+  state[1] = toU32(state[1] + b);
+  state[2] = toU32(state[2] + c);
+  state[3] = toU32(state[3] + d);
+  state[4] = toU32(state[4] + e);
+}
+
+// ─── SHA1 hasher ─────────────────────────────────────────────────────────────
+
+export class SHA1 {
+  private state = new Uint32Array(IV);
+  private buffer = new Uint8Array(64);
+  private bufLen = 0;
+  private totalLen = 0;      // in bytes (max 2^53 − 1 is fine for JS)
+
+  /** Feed raw bytes into the hash. */
+  update(data: Uint8Array): this {
+    let off = 0;
+    this.totalLen += data.length;
+
+    // Fill the partial block first
+    if (this.bufLen > 0) {
+      const need = 64 - this.bufLen;
+      const take = Math.min(need, data.length);
+      this.buffer.set(data.subarray(0, take), this.bufLen);
+      this.bufLen += take;
+      off += take;
+      if (this.bufLen === 64) {
+        processBlock(this.state, new DataView(this.buffer.buffer), 0);
+        this.bufLen = 0;
       }
     }
 
-    while (remaining >= 64) {
-      processBlock(this.state, data.subarray(offset, offset + 64));
-      offset += 64;
-      remaining -= 64;
+    // Process whole 64-byte blocks directly from the input
+    while (off + 64 <= data.length) {
+      // Copy to aligned buffer to guarantee DataView alignment
+      this.buffer.set(data.subarray(off, off + 64));
+      processBlock(this.state, new DataView(this.buffer.buffer), 0);
+      off += 64;
     }
 
-    if (remaining > 0) {
-      this.buffer.set(data.subarray(offset), 0);
+    // Stash leftovers
+    if (off < data.length) {
+      this.buffer.set(data.subarray(off), 0);
+      this.bufLen = data.length - off;
     }
+
+    return this;
   }
 
-  updateFromBuffer(buffer: ArrayBuffer): void {
-    this.update(new Uint8Array(buffer));
+  /** Convenience: feed a UTF-8 string. */
+  updateString(s: string): this {
+    return this.update(new TextEncoder().encode(s));
   }
 
+  /** Finalise and return the 20-byte digest. Does NOT mutate the hasher. */
   evaluate(): Uint8Array {
-    // Clone state so evaluate can be called multiple times
-    const stateCopy = new Uint32Array(this.state);
-    const countCopy = this.count;
+    // Clone state so we can call evaluate() repeatedly
+    const st = new Uint32Array(this.state);
+    const buf = new Uint8Array(64);
+    buf.set(this.buffer.subarray(0, this.bufLen));
+    let pos = this.bufLen;
 
-    const bufferIndex = countCopy % 64;
-    const padBuffer = new Uint8Array(64);
+    // Padding: append 0x80
+    buf[pos++] = 0x80;
 
-    // Copy remaining bytes
-    padBuffer.set(this.buffer.subarray(0, bufferIndex));
-    padBuffer[bufferIndex] = 0x80;
-
-    if (bufferIndex >= 56) {
-      // Need two blocks
-      processBlock(stateCopy, padBuffer);
-      padBuffer.fill(0);
+    if (pos > 56) {
+      // Not enough room for the 8-byte length → pad this block, process, start new
+      buf.fill(0, pos, 64);
+      processBlock(st, new DataView(buf.buffer), 0);
+      buf.fill(0, 0, 56);
+    } else {
+      buf.fill(0, pos, 56);
     }
 
-    // Append length in bits as big-endian 64-bit
-    const bitLength = countCopy * 8;
-    const view = new DataView(padBuffer.buffer);
-    // High 32 bits (for messages < 2^32 bytes, this handles up to ~512MB)
-    view.setUint32(56, Math.floor(bitLength / 0x100000000) >>> 0, false);
-    view.setUint32(60, (bitLength & 0xffffffff) >>> 0, false);
+    // Append bit-length as 64-bit big-endian
+    const bitLen = this.totalLen * 8;
+    const dv = new DataView(buf.buffer);
+    dv.setUint32(56, Math.floor(bitLen / 0x100000000), false);
+    dv.setUint32(60, bitLen >>> 0, false);
+    processBlock(st, dv, 0);
 
-    processBlock(stateCopy, padBuffer);
-
-    // Output digest as big-endian bytes
+    // Serialise 5 × 32-bit words → 20 bytes big-endian
     const digest = new Uint8Array(20);
-    const dv = new DataView(digest.buffer);
-    for (let i = 0; i < 5; i++) {
-      dv.setUint32(i * 4, stateCopy[i], false);
-    }
-
+    const out = new DataView(digest.buffer);
+    for (let i = 0; i < 5; i++) out.setUint32(i * 4, st[i], false);
     return digest;
+  }
+
+  /** Reset the hasher for reuse. */
+  reset(): this {
+    this.state.set(IV);
+    this.bufLen = 0;
+    this.totalLen = 0;
+    return this;
   }
 }
