@@ -7,7 +7,6 @@ import {
 import { Encoding, preprocessStrings, getEncoder } from "../crypto/Encoding";
 import { buildRar4Archive } from "../crypto/RarArchive";
 import { useI18n } from "../i18n";
-import TurnstileWidget from "./TurnstileWidget";
 import UsageGuide from "./UsageGuide";
 
 type ExportFormat = "key" | "rar";
@@ -22,7 +21,6 @@ export default function KeygenForm() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [captchaVerified, setCaptchaVerified] = useState(false);
 
   const handleGenerate = useCallback(() => {
     setError(null);
@@ -162,16 +160,8 @@ export default function KeygenForm() {
         </div>
       </div>
 
-      {/* Cloudflare Turnstile */}
-      <TurnstileWidget
-        className="captcha-wrapper"
-        onSuccess={() => setCaptchaVerified(true)}
-        onExpire={() => setCaptchaVerified(false)}
-        onError={() => setCaptchaVerified(false)}
-      />
-
       {/* Generate */}
-      <button className="btn-primary" onClick={handleGenerate} disabled={loading || !captchaVerified}>
+      <button className="btn-primary" onClick={handleGenerate} disabled={loading}>
         {loading ? t.btnGenerating : t.btnGenerate}
       </button>
 
